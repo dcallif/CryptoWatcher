@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>About</title>
+  </head>
+  <body>
+    {% extends "template.html" %}
+    {% block content %}
+
+    <br>
+    <h2>About</h2>
+    <p><b>Crypto Stuff:</b></p>
+    <ul>
+      <li>
+        <a href="{{ url_for('tokens') }}">Tokens Page</a>
+      </li>
+    </ul>
+
+    {% endblock %}
+  </body>
+</html>
