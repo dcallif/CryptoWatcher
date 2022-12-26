@@ -1,7 +1,8 @@
 const alert = document.querySelector('.alert')
 const form = document.querySelector('.token-form')
-const todo = document.getElementById('name')
-const description = document.getElementById('ticker')
+const token = document.getElementById('name')
+const ticker = document.getElementById('ticker')
+const amountHeld = document.getElementById('amount')
 const submitBtn = document.querySelector('.submit-btn')
 const container = document.querySelector('.token-container')
 const list = document.querySelector('.token-list')
@@ -45,24 +46,25 @@ async function makeAPICall(url = '', method="POST", data = null) {
 
 
 function addItem(e) {
-    //e.preventDefault()
-    const title = todo.value
-    const desc = description.value
+    e.preventDefault()
 
-    if (!title){
+    const name = token.value
+    const item_ticker = ticker.value
+    const amount = amountHeld.value
+
+    if (!name){
         displayAlert('Please enter crypto details','danger')
         return
     }
 
-
-    makeAPICall(`/token`, "POST", { "name":title, "ticker": desc, "amountHeld": e.currentTarget.parentElement.parentElement.getAttribute("amountHeld") })
+    makeAPICall(`/token`, "POST", { "name":name, "ticker":item_ticker, "amountHeld":amount })
             .then(data => {
             console.log(data); // JSON data parsed by `data.json()` call
-            displayAlert('Todo added to the list', 'success')
+            displayAlert('Token added to the list!', 'success')
             container.classList.add('show-container')
-            createListItem(data.id, data.Title, data.Description)
+            createListItem(data.id, name, amount + "")
         });
-        setBackToDefault()
+    setBackToDefault()
 }
 
 function displayAlert(text, color) {
@@ -94,15 +96,15 @@ function editTodo(e) {
     editID = element.dataset.id
     makeAPICall(`/todo/${editID}`, "GET").then((data) => {
         data = data[0]
-        todo.value = data.Title
-        description.value = data.Description
+        token.value = data.Title
+        ticker.value = data.ticker
         editFlag = true
         submitBtn.textContent = 'edit'
     })
 }
 
 function setBackToDefault() {
-    todo.value = ''
+    token.value = ''
     editFlag = false
     editID = ''
     submitBtn.textContent = 'Submit'
@@ -121,16 +123,16 @@ function setupItems(){
     })
 }
 
-function createListItem(id, value, description) {
+function createListItem(id, ticker, amount) {
     const element = document.createElement('token')
         element.classList.add('token-item')
         const attr = document.createAttribute('token-name')
         attr.value = id
         element.setAttributeNode(attr)
-        description = numberWithCommas(description)
+        amount = numberWithCommas(amount)
         element.innerHTML = `
-            <p class="title">${value}
-            <br/> ${description}
+            <p class="title">${ticker}
+            <br/> ${amount}
             </p>
             <div class="btn-container">
                 <button type='button' class='edit-btn'>
