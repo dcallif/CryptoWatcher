@@ -73,7 +73,7 @@ def login():
         password = request.form.get('password')
         remember = True if request.form.get('remember') else False
 
-        user = UserService().get_by_id(email)[0]
+        user = UserService().get_by_id(email)
 
         # check if user actually exists
         # take the user supplied password, hash it, and compare it to the hashed password in database
