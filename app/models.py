@@ -80,7 +80,7 @@ class CryptoWatcherModel:
 
     def list_items(self, where_clause=""):
         query = f"SELECT name, ticker, amountHeld " \
-                f"from {self.table_name}"
+                f"from {self.table_name} ORDER BY NAME"
         print(query)
         result_set = self.conn.execute(query).fetchall()
         result = [{column: row[i]

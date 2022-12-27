@@ -62,7 +62,7 @@ function addItem(e) {
             console.log(data); // JSON data parsed by `data.json()` call
             displayAlert('Token added to the list!', 'success')
             container.classList.add('show-container')
-            createListItem(data.id, name, amount + "")
+            createListItem(data.id, item_ticker + "", amount + "")
         });
     setBackToDefault()
 }
@@ -105,6 +105,8 @@ function editTodo(e) {
 
 function setBackToDefault() {
     token.value = ''
+    ticker.value = ''
+    amountHeld.value = ''
     editFlag = false
     editID = ''
     submitBtn.textContent = 'Submit'
@@ -113,6 +115,24 @@ function setBackToDefault() {
 function setupItems(){
     makeAPICall("/list-tokens", "GET").then((data) => {
         console.log(data)
+
+        // Sort by value
+        // data.sort((a, b) => a.value - b.value);
+
+        // Sort array by object name
+        data.sort((a, b) => {
+            const name1 = a.name.toUpperCase() // Ignore case
+            const name2 = b.name.toUpperCase() // Ignore case
+            if (name1 < name2) {
+                return -1
+            }
+            if (name1 > name2) {
+                return 1
+            }
+            return 0 // Should only happen if names are equal
+        });
+
+        // Add items to list in UI
         if (data.length > 0) {
             data.forEach(item => {
                 createListItem(item.name, item.ticker, item.amountHeld)
@@ -149,4 +169,3 @@ function createListItem(id, ticker, amount) {
         editBtn.addEventListener('click', editTodo)
         list.appendChild(element)
 }
-

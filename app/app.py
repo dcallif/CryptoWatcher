@@ -43,9 +43,9 @@ def create_token():
     return jsonify(CryptoWatcherService().create(request.get_json()))
 
 
-@app.route("/token/<item_id>", methods=["PUT"])
-def update_item(item_id):
-    return jsonify(CryptoWatcherService().update(item_id, request.get_json()))
+@app.route("/token/<token_id>", methods=["PUT"])
+def update_item(token_id):
+    return jsonify(CryptoWatcherService().update(token_id, request.get_json()))
 
 
 @app.route("/token/<token_id>", methods=["DELETE"])
