@@ -28,7 +28,8 @@ class Schema:
                 CREATE TABLE IF NOT EXISTS "USER" (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                email TEXT,
+                email TEXT NOT NULL,
+                password TEXT NOT NULL,
                 created Date default CURRENT_DATE,
                 updated Date default CURRENT_DATE
                 );
@@ -90,12 +91,49 @@ class CryptoWatcherModel:
         return result
 
 
-class User:
+class UserModel:
     table_name = "USER"
 
-    def create(self, name, email):
+    def __init__(self):
+        self.conn = sqlite3.connect('watcher.db')
+        self.conn.row_factory = sqlite3.Row
+
+    def __del__(self):
+        self.conn.commit()
+        self.conn.close()
+
+    def get_by_id(self, _id):
+        where_clause = f"WHERE email = '{_id}'"
+        return self.list_items(where_clause)
+
+    def create(self, email, name, password):
         query = f'INSERT INTO {self.table_name} ' \
-                f'(name, email) ' \
-                f'values ({name},{email})'
+                f'(name, email, password) ' \
+                f'values ("{name}","{email}","{password}")'
         result = self.conn.execute(query)
+        return self.get_by_id(result.lastrowid)
+
+    def list_items(self, where_clause=""):
+        query = f"SELECT id, name, password, updated " \
+                f"from {self.table_name} "
+        print(query)
+        result_set = self.conn.execute(query).fetchall()
+        result = [{column: row[i]
+                   for i, column in enumerate(result_set[0].keys())}
+                  for row in result_set]
+        print(result)
         return result
+
+    def get_pass(self, _id):
+        query = f"SELECT password FROM {self.table_name}" \
+                f"WHERE id = {_id}"
+        print(query)
+        result_set = self.conn.execute(query).fetchone()
+        return result_set
+
+    def get_id(self, email):
+        query = f"SELECT id FROM {self.table_name}" \
+                f"WHERE id = {email}"
+        print(query)
+        result_set = self.conn.execute(query).fetchone()
+        return result_set
