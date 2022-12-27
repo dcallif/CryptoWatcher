@@ -1,9 +1,7 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Blueprint
 
-from service import CryptoWatcherService
 from models import Schema
-
-import json
+from service import CryptoWatcherService
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 
@@ -53,6 +51,22 @@ def delete_item(token_id):
     return jsonify(CryptoWatcherService().delete(token_id))
 
 
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
+
+
 if __name__ == "__main__":
     Schema()
     app.run(debug=True, host='127.0.0.1', port=8888)
+

@@ -109,7 +109,7 @@ function setBackToDefault() {
     amountHeld.value = ''
     editFlag = false
     editID = ''
-    submitBtn.textContent = 'Submit'
+    submitBtn.textContent = 'Add'
 }
 
 function setupItems(){
