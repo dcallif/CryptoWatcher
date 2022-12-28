@@ -34,8 +34,9 @@ def home():
 @app.route("/tokens")
 @login_required
 def tokens():
-    if current_user.is_authenticated:
+    if current_user.id is not None:
         return render_template("crypto.html")
+    flash('Please login before accessing crypto page.')
     return render_template("login.html")
 
 
@@ -135,7 +136,7 @@ def signup():
         # Need to query to see if user exists
         user = UserService().get_by_email(email)
         if user:
-            flash('User already exists...please try with a different email')
+            flash('User already exists...please try with a different email.')
             return redirect(url_for('signup'))
         else:
             UserService().create(email, name, generate_password_hash(password, method='sha256'))
@@ -151,11 +152,10 @@ def signup():
 def logout():
     flask_login.logout_user()
     res = flask.make_response("Deleting cookie")
-    print("Trying to delete cookie")
     res.set_cookie('', max_age=0)
     current_user.logged_in = False
-    return res
-    # return redirect(url_for('home'))
+
+    return redirect(url_for('home'))
 
 
 class User(flask_login.UserMixin):
