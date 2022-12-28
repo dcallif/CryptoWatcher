@@ -32,9 +32,10 @@ def home():
 
 
 @app.route("/tokens")
-@login_required
+@flask_login.login_required
 def tokens():
     if current_user.id is not None:
+        # print(current_user.id)
         return render_template("crypto.html")
     flash('Please login before accessing crypto page.')
     return render_template("login.html")
@@ -164,7 +165,6 @@ class User(flask_login.UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    print(user_id)
     # print(''.join(user_id[1]))
     # return UserService().get_by_id(user_id)
     user = User()
