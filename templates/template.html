@@ -15,9 +15,12 @@
             <li class="my-list"><a href="{{ url_for('home') }}">Home</a></li>
             <li class="my-list"><a href="{{ url_for('about') }}">About</a></li>
             <li class="my-list"><a href="{{ url_for('tokens') }}">Crypto</a></li>
+            {% if current_user.id %}
             <li class="my-auth-list"><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
             <li class="my-auth-list"><a href="{{ url_for('login') }}">Login</a></li>
             <li class="my-auth-list"><a href="{{ url_for('signup') }}">Signup</a></li>
+            {% endif %}
           </ul>
         </nav></strong>
       </div>
