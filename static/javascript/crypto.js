@@ -114,7 +114,7 @@ function setBackToDefault() {
 
 function setupItems(){
     makeAPICall("/list-tokens", "GET").then((data) => {
-        console.log(data)
+        // console.log(data)
 
         // Sort by value
         // data.sort((a, b) => a.value - b.value);

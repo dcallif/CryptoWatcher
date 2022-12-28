@@ -46,7 +46,6 @@ def about():
 
 
 @app.route("/list-tokens", methods=["GET"])
-@login_required
 def list_tokens():
     return jsonify(CryptoWatcherService().list())
 
@@ -71,7 +70,8 @@ def delete_item(token_id):
 @flask_login.login_required
 def profile():
     if current_user.id is not None:
-        return render_template('profile.html', name=current_user.id)
+        user = UserService().get_by_email(current_user.id)
+        return render_template('profile.html', name=user['name'])
 
     flash('Please login before accessing profile page.')
     return render_template('login.html')
