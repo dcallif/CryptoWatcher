@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from models import Schema
 from service import CryptoWatcherService, UserService
-from flask_login import LoginManager, login_required, current_user, login_user
+from flask_login import LoginManager, login_required, current_user
 
 login_manager = LoginManager()
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
@@ -72,7 +72,7 @@ def delete_item(token_id):
 def profile():
     if current_user.id is not None:
         user = UserService().get_by_email(current_user.id)
-        return render_template('profile.html', name=user['name'])
+        return render_template('profile.html', name=user['name'], email=user['email'])
 
     flash('Please login before accessing profile page.')
     return render_template('login.html')
@@ -109,7 +109,7 @@ def login():
         # if the above check passes, then we know the user has the right creds
         # login_user(user_obj, remember=remember, force=True)
         flask_login.login_user(user_obj)
-        return render_template('profile.html', name=current_user.name)
+        return render_template('profile.html', name=current_user.name, email=user['email'])
 
 
 @app.route('/signup', methods=['GET', 'POST'])
