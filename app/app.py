@@ -30,6 +30,7 @@ def home():
 
 
 @app.route("/tokens")
+@login_required
 def tokens():
     return render_template("crypto.html")
 
@@ -61,6 +62,7 @@ def delete_item(token_id):
 
 
 @app.route('/profile')
+@flask_login.login_required
 def profile(name):
     return render_template('profile.html', name=name)
 
@@ -81,7 +83,8 @@ def login():
             return redirect(url_for('login'))  # if user doesn't exist or password is wrong, reload the page
         user_obj = User()
         user_obj.id = user['email']
-        print(f'Successfully generated user from db: {user_obj}')
+        user_obj.name = user['name']
+        print(f'Found user in db: {user_obj}')
         # print(user.keys())
         # print(user['name'])
 
@@ -94,8 +97,8 @@ def login():
 
         # if the above check passes, then we know the user has the right creds
         # login_user(user_obj, remember=remember, force=True)
-        flask_login.login_user(user_obj)
-        return render_template('profile.html', name=user['email'])
+        flask_login.login_user(user_obj, remember=remember, force=True, fresh=True)
+        return render_template('profile.html', name=current_user.name)
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -135,9 +138,10 @@ def signup():
 
 
 @app.route('/logout')
+@login_required
 def logout():
     flask_login.logout_user()
-    return 'Logged out'
+    return redirect(url_for('home.index'))
 
 
 class User(flask_login.UserMixin):
@@ -146,8 +150,12 @@ class User(flask_login.UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
+    print(user_id)
     # print(''.join(user_id[1]))
-    return UserService().get_by_id(''.join(user_id[1]))
+    # return UserService().get_by_id(user_id)
+    user = User()
+    user.id = user_id
+    return user
 
 
 @login_manager.request_loader

@@ -392,3 +392,11 @@ input[type=password]::placeholder {
   overflow: hidden;
   text-align: center;
 }
+
+.my-auth-list {
+  list-style-type: none;
+  float: right;
+  padding: 10px;
+  overflow: hidden;
+  text-align: center;
+}
