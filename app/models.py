@@ -108,7 +108,7 @@ class UserModel:
         return self.list_items(query)
 
     def get_by_email(self, email):
-        query = f"SELECT id, name, password, updated " \
+        query = f"SELECT id, name, email, password, updated " \
                 f"from {self.table_name} " \
                 f"WHERE email = '{email}'"
 
@@ -122,11 +122,9 @@ class UserModel:
         result = self.conn.execute(query)
         return self.get_by_id(result.lastrowid)
 
-    def list_items(self, where_clause):
+    def list_items(self, where_clause=""):
         query = f"SELECT id, name, email, password, updated " \
-                f"from {self.table_name} "
-        if where_clause:
-            query + where_clause
+                f"from {self.table_name} " + where_clause
         print(query)
         result_set = self.conn.execute(query).fetchall()
         result = [{column: row[i]

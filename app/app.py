@@ -1,3 +1,4 @@
+import flask_login
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -7,10 +8,11 @@ from flask_login import LoginManager, login_required, current_user, login_user
 
 login_manager = LoginManager()
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
-login_manager.init_app(app)
 
 app.config['SECRET_KEY'] = 'secret-key-goes-here'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///watcher.db'
+
+login_manager.init_app(app)
 
 
 @app.after_request
@@ -59,9 +61,8 @@ def delete_item(token_id):
 
 
 @app.route('/profile')
-@login_required
-def profile():
-    return render_template('profile.html', name=current_user.name)
+def profile(name):
+    return render_template('profile.html', name=name)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -73,18 +74,28 @@ def login():
         password = request.form.get('password')
         remember = True if request.form.get('remember') else False
 
-        user = UserService().get_by_id(email)
+        user = UserService().get_by_email(email)
+        # user_obj = {user['email']: {'password': user['password']}}
+        if user is None:
+            flash('Please check your login details and try again.')
+            return redirect(url_for('login'))  # if user doesn't exist or password is wrong, reload the page
+        user_obj = User()
+        user_obj.id = user['email']
+        print(f'Successfully generated user from db: {user_obj}')
+        # print(user.keys())
+        # print(user['name'])
 
         # check if user actually exists
         # take the user supplied password, hash it, and compare it to the hashed password in database
         # if not user or not check_password_hash(user.password, password):
-        if not user or not check_password_hash(user[0]['password'], password):
+        if not user or not check_password_hash(user['password'], password):
             flash('Please check your login details and try again.')
             return redirect(url_for('login'))  # if user doesn't exist or password is wrong, reload the page
 
-        # if the above check passes, then we know the user has the right credentials
-        login_user(user, remember=remember, force=True)
-        return redirect(url_for('profile'))
+        # if the above check passes, then we know the user has the right creds
+        # login_user(user_obj, remember=remember, force=True)
+        flask_login.login_user(user_obj)
+        return render_template('profile.html', name=user['email'])
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -123,9 +134,29 @@ def signup():
                 return redirect(url_for('login'))
 
 
+@app.route('/logout')
+def logout():
+    flask_login.logout_user()
+    return 'Logged out'
+
+
+class User(flask_login.UserMixin):
+    pass
+
+
 @login_manager.user_loader
 def load_user(user_id):
-    return UserService().get_by_id(user_id)
+    # print(''.join(user_id[1]))
+    return UserService().get_by_id(''.join(user_id[1]))
+
+
+@login_manager.request_loader
+def request_loader(request):
+    email = request.form.get('email')
+
+    user = User()
+    user.id = email
+    return user
 
 
 @app.route('/users', methods=['GET'])
