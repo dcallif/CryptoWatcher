@@ -43,3 +43,7 @@ class UserService:
     def get_by_id(self, item_id):
         response = self.model.get_by_id(item_id)
         return response
+
+    def get_by_email(self, email):
+        response = self.model.get_by_email(email)
+        return response

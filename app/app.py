@@ -96,9 +96,31 @@ def signup():
         email = request.form.get('email')
         name = request.form.get('name')
         password = request.form.get('password')
-        flash('Email address already exists')
-        UserService().create(email, name, generate_password_hash(password, method='sha256'))
-        return redirect(url_for('signup'))
+
+        if email == '':
+            flash('Please enter a valid email and try again.')
+            return redirect(url_for('signup'))
+        if name == '':
+            flash('Please enter a name and try again.')
+            return render_template('signup.html', email=email)
+            # return redirect(url_for('signup'))
+        if password == '':
+            flash('Please enter a password and try again.')
+            return render_template('signup.html', email=email, name=name)
+            # return redirect(url_for('signup'))
+
+        # Need to query to see if user exists
+        user = UserService().get_by_email(email)
+        if user:
+            flash('User already exists...please try with a different email')
+            return redirect(url_for('signup'))
+        else:
+            UserService().create(email, name, generate_password_hash(password, method='sha256'))
+            # Need to query to see if user exists
+            user_created = UserService().get_by_id(request.form.get('email'))
+            if user_created:
+                flash('Successfully created user!')
+                return redirect(url_for('login'))
 
 
 @login_manager.user_loader

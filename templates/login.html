@@ -6,10 +6,17 @@
     <br>
                 {% with messages = get_flashed_messages() %}
 {% if messages %}
-        <p class="alert"></p>
-    <div class="alert-danger">
-        {{ messages[0] }}..
+    {% if messages[0] == 'Successfully created user!' %}
+    <p class="alert"></p>
+    <div class="alert-success">
+        {{ messages[0] }}
     </div>
+    {% else %}
+    <p class="alert"></p>
+    <div class="alert-danger">
+        {{ messages[0] }}
+    </div>
+    {% endif %}
 {% endif %}
 {% endwith %}
     <div class="box">

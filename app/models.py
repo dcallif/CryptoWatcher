@@ -103,8 +103,17 @@ class UserModel:
         self.conn.close()
 
     def get_by_id(self, _id):
-        where_clause = f"WHERE email = '{_id}'"
-        return self.list_items(where_clause)
+        query = f"WHERE email = '{_id}'"
+
+        return self.list_items(query)
+
+    def get_by_email(self, email):
+        query = f"SELECT id, name, password, updated " \
+                f"from {self.table_name} " \
+                f"WHERE email = '{email}'"
+
+        result_set = self.conn.execute(query).fetchone()
+        return result_set
 
     def create(self, email, name, password):
         query = f'INSERT INTO {self.table_name} ' \
@@ -113,9 +122,11 @@ class UserModel:
         result = self.conn.execute(query)
         return self.get_by_id(result.lastrowid)
 
-    def list_items(self, where_clause=""):
-        query = f"SELECT id, name, password, updated " \
+    def list_items(self, where_clause):
+        query = f"SELECT id, name, email, password, updated " \
                 f"from {self.table_name} "
+        if where_clause:
+            query + where_clause
         print(query)
         result_set = self.conn.execute(query).fetchall()
         result = [{column: row[i]
