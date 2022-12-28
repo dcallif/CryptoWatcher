@@ -1,3 +1,4 @@
+import flask
 import flask_login
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -11,6 +12,7 @@ app = Flask(__name__, template_folder='../templates', static_folder='../static')
 
 app.config['SECRET_KEY'] = 'secret-key-goes-here'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///watcher.db'
+app.config['REMEMBER_COOKIE_NAME'] = app.config.get('remember_cookie_name')
 
 login_manager.init_app(app)
 
@@ -32,7 +34,9 @@ def home():
 @app.route("/tokens")
 @login_required
 def tokens():
-    return render_template("crypto.html")
+    if current_user.is_authenticated:
+        return render_template("crypto.html")
+    return render_template("login.html")
 
 
 @app.route("/about")
@@ -41,6 +45,7 @@ def about():
 
 
 @app.route("/list-tokens", methods=["GET"])
+@login_required
 def list_tokens():
     return jsonify(CryptoWatcherService().list())
 
@@ -63,8 +68,12 @@ def delete_item(token_id):
 
 @app.route('/profile')
 @flask_login.login_required
-def profile(name):
-    return render_template('profile.html', name=name)
+def profile():
+    if current_user.id is not None:
+        return render_template('profile.html', name=current_user.id)
+
+    flash('Please login before accessing profile page.')
+    return render_template('login.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -97,7 +106,7 @@ def login():
 
         # if the above check passes, then we know the user has the right creds
         # login_user(user_obj, remember=remember, force=True)
-        flask_login.login_user(user_obj, remember=remember, force=True, fresh=True)
+        flask_login.login_user(user_obj)
         return render_template('profile.html', name=current_user.name)
 
 
@@ -141,7 +150,12 @@ def signup():
 @login_required
 def logout():
     flask_login.logout_user()
-    return redirect(url_for('home.index'))
+    res = flask.make_response("Deleting cookie")
+    print("Trying to delete cookie")
+    res.set_cookie('', max_age=0)
+    current_user.logged_in = False
+    return res
+    # return redirect(url_for('home'))
 
 
 class User(flask_login.UserMixin):
