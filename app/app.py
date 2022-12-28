@@ -78,7 +78,7 @@ def login():
         # check if user actually exists
         # take the user supplied password, hash it, and compare it to the hashed password in database
         # if not user or not check_password_hash(user.password, password):
-        if not user or not check_password_hash(user.get('password'), password):
+        if not user or not check_password_hash(user[0]['password'], password):
             flash('Please check your login details and try again.')
             return redirect(url_for('login'))  # if user doesn't exist or password is wrong, reload the page
 
