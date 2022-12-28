@@ -1,8 +1,19 @@
 {% extends "template.html" %}
 
 {% block content %}
+  <head>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='../static/css/template.css') }}">
+
+  </head>
 <br>
-<h1 class="title">
+<h2 class="title">
   Welcome, {{ name }}!
-</h1>
+</h2>
+<br>
+<a>Your email is: {{email}}</a><br>
+<p>Checkout your
+      <a href="{{ url_for('tokens') }}">Crypto Holding Page</a>
+      for more info on what is currently available!</p>
 {% endblock %}
