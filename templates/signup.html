@@ -1,0 +1,53 @@
+{% extends "template.html" %}
+
+{% block content %}
+<head>
+    <meta charset="utf-8">
+    <title>Signup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='../static/css/template.css') }}">
+
+  </head>
+<div class="column is-4 is-offset-4">
+    <br>
+    <h3 class="title">Sign Up</h3>
+    <br>
+    <div class="box">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert-danger">
+            {{ messages[0] }} Or login <a href="{{ url_for('login') }}">Here</a>
+        </div>
+        {% endif %}
+        {% endwith %}
+        <form method="POST" action="/signup">
+            <div class="field">
+                <div class="control">
+                    {% if email %}
+                    <input class="input is-large" type="email" name="email" value="{{ email }}" autofocus="">
+                    {% else %}
+                    <input class="input is-large" type="email" name="email" placeholder="Email" autofocus="">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    {% if name %}
+                    <input class="input is-large" type="text" name="name" value="{{ name }}" autofocus="">
+                    {% else %}
+                    <input class="input is-large" type="text" name="name" placeholder="Name" autofocus="">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <input class="input is-large" type="password" name="password" placeholder="Password">
+                </div>
+            </div>
+
+            <button class="button submit-btn is-block is-info is-large is-fullwidth">Sign Up</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
