@@ -1,6 +1,8 @@
+import datetime
+
 import flask
 import flask_login
-from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
+from flask import Flask, render_template, request, jsonify, flash, redirect, url_for, session, g
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from models import Schema
@@ -13,6 +15,8 @@ app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['SECRET_KEY'] = 'secret-key-goes-here'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///watcher.db'
 app.config['REMEMBER_COOKIE_NAME'] = app.config.get('remember_cookie_name')
+app.REMEMBER_COOKIE_DURATION = datetime.timedelta(minutes=60)
+app.PERMANENT_SESSION_LIFETIME = datetime.timedelta(minutes=60)
 
 login_manager.init_app(app)
 
@@ -24,6 +28,14 @@ def add_headers(response):
                                                        "X-Requested-With "
     response.headers['Access-Control-Allow-Methods'] = "POST, GET, PUT, DELETE, OPTIONS"
     return response
+
+
+@app.before_request
+def before_request():
+    session.permanent = True
+    app.permanent_session_lifetime = datetime.timedelta(minutes=60)
+    flask.session.modified = True
+    g.user = current_user
 
 
 @app.route("/")
