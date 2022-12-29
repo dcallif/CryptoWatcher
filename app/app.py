@@ -36,7 +36,7 @@ def home():
 def tokens():
     if current_user.id is not None:
         # print(current_user.id)
-        return render_template("crypto.html")
+        return render_template("crypto.html", user_email=current_user.id)
     flash('Please login before accessing crypto page.')
     return render_template("login.html")
 
@@ -46,14 +46,14 @@ def about():
     return render_template("about.html")
 
 
-@app.route("/list-tokens", methods=["GET"])
-def list_tokens():
-    return jsonify(CryptoWatcherService().list())
+@app.route("/list-tokens/<user_id>", methods=["GET"])
+@flask_login.login_required
+def list_tokens(user_id):
+    return jsonify(CryptoWatcherService().list(user_id))
 
 
 @app.route("/token", methods=["POST"])
 def create_token():
-    print(request)
     return jsonify(CryptoWatcherService().create(request.get_json()))
 
 
@@ -63,8 +63,9 @@ def update_item(token_id):
 
 
 @app.route("/token/<token_id>", methods=["DELETE"])
+@flask_login.login_required
 def delete_item(token_id):
-    return jsonify(CryptoWatcherService().delete(token_id))
+    return jsonify(CryptoWatcherService().delete(token_id, request.get_json()))
 
 
 @app.route('/profile')

@@ -11,11 +11,11 @@ class CryptoWatcherService:
     def update(self, item_id, params):
         return self.model.update(item_id, params)
 
-    def delete(self, item_id):
-        return self.model.delete(item_id)
+    def delete(self, item_id, params):
+        return self.model.delete(item_id, params)
 
-    def list(self):
-        response = self.model.list_items()
+    def list(self, user_id):
+        response = self.model.list_items(user_id)
         return response
 
     def get_by_id(self, item_id):

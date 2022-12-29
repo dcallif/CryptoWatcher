@@ -3,6 +3,7 @@ const form = document.querySelector('.token-form')
 const token = document.getElementById('name')
 const ticker = document.getElementById('ticker')
 const amountHeld = document.getElementById('amount')
+const user_email = document.getElementById('user_email')
 const submitBtn = document.querySelector('.submit-btn')
 const container = document.querySelector('.token-container')
 const list = document.querySelector('.token-list')
@@ -51,18 +52,19 @@ function addItem(e) {
     const name = token.value
     const item_ticker = ticker.value
     const amount = amountHeld.value
+    const user = user_email.value
 
-    if (!name || !item_ticker || !amount){
+    if (!name || !item_ticker || !amount || !user){
         displayAlert('Please enter crypto details','danger')
         return
     }
 
-    makeAPICall(`/token`, "POST", { "name":name, "ticker":item_ticker, "amountHeld":amount })
+    makeAPICall(`/token`, "POST", { "name":name, "ticker":item_ticker, "amountHeld":amount, "user_email":user })
             .then(data => {
             console.log(data); // JSON data parsed by `data.json()` call
             displayAlert('Token added to the list!', 'success')
             container.classList.add('show-container')
-            createListItem(data.id, item_ticker + "", amount + "")
+            createListItem(data.id, item_ticker + "", amount + "", user_email + "")
         });
     setBackToDefault()
 }
@@ -78,9 +80,10 @@ function displayAlert(text, color) {
 }
 
 function deleteTodo(e) {
+    const user = user_email.value
     const element = e.currentTarget.parentElement.parentElement
     const id = element.getAttribute("token-name")
-    makeAPICall(`/token/${id}`, "DELETE").then((data) => {
+    makeAPICall(`/token/${id}`, "DELETE", {"user_email":user}).then((data) => {
         list.removeChild(element)
         if (list.children.length === 0) {
             container.classList.remove('show-container')
@@ -113,7 +116,8 @@ function setBackToDefault() {
 }
 
 function setupItems(){
-    makeAPICall("/list-tokens", "GET").then((data) => {
+    const user = user_email.value
+    makeAPICall(`/list-tokens/${user}`, "GET").then((data) => {
         // console.log(data)
 
         // Sort by value
