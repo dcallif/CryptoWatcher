@@ -52,7 +52,7 @@ function addItem(e) {
     const item_ticker = ticker.value
     const amount = amountHeld.value
 
-    if (!name){
+    if (!name || !item_ticker || !amount){
         displayAlert('Please enter crypto details','danger')
         return
     }
@@ -169,3 +169,4 @@ function createListItem(id, ticker, amount) {
         editBtn.addEventListener('click', editTodo)
         list.appendChild(element)
 }
+
