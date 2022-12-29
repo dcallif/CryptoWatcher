@@ -49,7 +49,10 @@ class CryptoWatcherModel:
         self.conn.close()
 
     def get_by_id(self, _id):
-        where_clause = f"WHERE name='{_id}'"
+        if type(_id) == int:
+            where_clause = f"user_id={_id}"
+        else:
+            where_clause = f"email='{_id}'"
         return self.list_items(where_clause)
 
     def create(self, params):
@@ -59,7 +62,7 @@ class CryptoWatcherModel:
                 f'{params.get("amountHeld")},(SELECT id FROM USER WHERE email = "{params.get("user_email")}"))'
         print(query)
         result = self.conn.execute(query)
-        return self.get_by_id(result.lastrowid)
+        return self.list_items(params.get("user_email"))
 
     def delete(self, item_id, params):
         query = f"DELETE FROM {self.table_name} " \
