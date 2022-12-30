@@ -1,3 +1,3 @@
 # CryptoWatcher
 
-Currently deployed here: http://reluctanttycoon.com/about
+Currently deployed here: http://reluctanttycoon.com
