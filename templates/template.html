@@ -14,8 +14,8 @@
           <ul class="menu">
             <li class="my-list"><a href="{{ url_for('home') }}">Home</a></li>
             <li class="my-list"><a href="{{ url_for('about') }}">About</a></li>
-            <li class="my-list"><a href="{{ url_for('tokens') }}">Crypto</a></li>
             {% if current_user.id %}
+            <li class="my-list"><a href="{{ url_for('tokens') }}">Crypto</a></li>
             <li class="my-auth-list"><a href="{{ url_for('logout') }}">Logout</a></li>
             <li class="my-auth-list"><a href="{{ url_for('profile') }}">Profile</a></li>
             {% else %}
@@ -30,6 +30,13 @@
 
     {% block content %}
     {% endblock %}
+
+    <script>
+    function myFunction() {
+    var element = document.body;
+    element.classList.toggle("dark-mode");
+    }
+</script>
 
   </body>
 </html>

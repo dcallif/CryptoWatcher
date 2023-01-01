@@ -3,6 +3,7 @@ const form = document.querySelector('.token-form')
 const token = document.getElementById('name')
 const ticker = document.getElementById('ticker')
 const amountHeld = document.getElementById('amount')
+const user_email = document.getElementById('user_email')
 const submitBtn = document.querySelector('.submit-btn')
 const container = document.querySelector('.token-container')
 const list = document.querySelector('.token-list')
@@ -16,7 +17,7 @@ function numberWithCommas(x) {
 let editElement
 let editFlag = false
 let editID = ''
-const APP_URL = "http://localhost:8888"
+const APP_URL = "http://127.0.0.1:8888" // localhost
 
 form.addEventListener('submit', addItem)
 
@@ -37,7 +38,8 @@ async function makeAPICall(url = '', method="POST", data = null) {
         // 'Content-Type': 'application/x-www-form-urlencoded',
       },
       redirect: 'follow', // manual, *follow, error
-      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      //referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      referrerPolicy: 'strict-origin-when-cross-origin',
       body: data // body data type must match "Content-Type" header
     });
     return response.json(); // parses JSON response into native JavaScript objects
@@ -51,18 +53,19 @@ function addItem(e) {
     const name = token.value
     const item_ticker = ticker.value
     const amount = amountHeld.value
+    const user = user_email.value
 
-    if (!name || !item_ticker || !amount){
+    if (!name || !item_ticker || !amount || !user){
         displayAlert('Please enter crypto details','danger')
         return
     }
 
-    makeAPICall(`/token`, "POST", { "name":name, "ticker":item_ticker, "amountHeld":amount })
+    makeAPICall(`/token`, "POST", { "name":name, "ticker":item_ticker, "amountHeld":amount, "user_email":user })
             .then(data => {
             console.log(data); // JSON data parsed by `data.json()` call
             displayAlert('Token added to the list!', 'success')
             container.classList.add('show-container')
-            createListItem(data.id, item_ticker + "", amount + "")
+            createListItem(data.id, item_ticker + "", amount + "", user_email + "")
         });
     setBackToDefault()
 }
@@ -78,9 +81,10 @@ function displayAlert(text, color) {
 }
 
 function deleteTodo(e) {
+    const user = user_email.value
     const element = e.currentTarget.parentElement.parentElement
     const id = element.getAttribute("token-name")
-    makeAPICall(`/token/${id}`, "DELETE").then((data) => {
+    makeAPICall(`/token/${id}`, "DELETE", {"user_email":user}).then((data) => {
         list.removeChild(element)
         if (list.children.length === 0) {
             container.classList.remove('show-container')
@@ -91,10 +95,14 @@ function deleteTodo(e) {
 }
 
 function editTodo(e) {
+    const edit_token = e.currentTarget.parentElement.parentElement
+    const user = user_email.value
+
+    displayAlert('Not yet implemented.', 'danger')
+    console.log(edit_token)
     const element = e.currentTarget.parentElement.parentElement
-    editElement = e.currentTarget.parentElement.previousElementSibling
-    editID = element.dataset.id
-    makeAPICall(`/todo/${editID}`, "GET").then((data) => {
+    const id = element.getAttribute("token-name")
+    makeAPICall(`/token/${id}`, "PUT", {"user_email":user}).then((data) => {
         data = data[0]
         token.value = data.Title
         ticker.value = data.ticker
@@ -113,9 +121,8 @@ function setBackToDefault() {
 }
 
 function setupItems(){
-    makeAPICall("/list-tokens", "GET").then((data) => {
-        // console.log(data)
-
+    const user = user_email.value
+    makeAPICall(`/list-tokens`, "GET").then((data) => {
         // Sort by value
         // data.sort((a, b) => a.value - b.value);
 

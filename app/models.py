@@ -17,6 +17,7 @@ class Schema:
                   id INTEGER PRIMARY KEY,
                   name TEXT,
                   ticker TEXT,
+                  accountAddress TEXT,
                   amountHeld INTEGER,
                   user_id INTEGER FOREIGNKEY REFERENCES USER(id)
                 );
@@ -49,25 +50,28 @@ class CryptoWatcherModel:
         self.conn.close()
 
     def get_by_id(self, _id):
-        where_clause = f"WHERE name='{_id}'"
+        if type(_id) == int:
+            where_clause = f"user_id={_id}"
+        else:
+            where_clause = f"email='{_id}'"
         return self.list_items(where_clause)
 
     def create(self, params):
-        print(params)
         query = f'INSERT INTO {self.table_name} ' \
                 f'(name, ticker, amountHeld, user_id) ' \
                 f'values ("{params.get("name")}","{params.get("ticker")}",' \
-                f'"{params.get("amountHeld")}","{params.get("user_id")}")'
+                f'{params.get("amountHeld")},(SELECT id FROM USER WHERE email = "{params.get("user_email")}"))'
         print(query)
         result = self.conn.execute(query)
-        return self.get_by_id(result.lastrowid)
+        return self.list_items(params.get("user_email"))
 
-    def delete(self, item_id):
+    def delete(self, item_id, params):
         query = f"DELETE FROM {self.table_name} " \
-                f"WHERE name = '{item_id}'"
+                f"WHERE name = '{item_id}'" \
+                f" AND user_id = (SELECT id FROM USER WHERE email = '{params.get('user_email')}')"
         print(query)
         self.conn.execute(query)
-        return self.list_items()
+        return self.list_items(params.get('user_email'))
 
     def update(self, item_id, update_dict):
         set_query = ", ".join([f'{column} = "{value}"'
@@ -75,13 +79,20 @@ class CryptoWatcherModel:
         query = f"UPDATE {self.table_name} " \
                 f"SET {set_query} " \
                 f"WHERE name = '{item_id}'"
-
+        print(query)
         self.conn.execute(query)
         return self.get_by_id(item_id)
 
-    def list_items(self, where_clause=""):
-        query = f"SELECT name, ticker, amountHeld " \
-                f"from {self.table_name} ORDER BY NAME"
+    def list_items(self, user_id):
+        query = ""
+        if type(user_id) == int:
+            query = f"SELECT name, ticker, amountHeld, accountAddress, user_id " \
+                f"from {self.table_name} " \
+                f"WHERE user_id = {user_id}"
+        else:
+            query = f"SELECT name, ticker, amountHeld, accountAddress, user_id " \
+                    f"from {self.table_name} " \
+                    f"WHERE user_id = (SELECT id FROM USER WHERE email = '{user_id}')"
         print(query)
         result_set = self.conn.execute(query).fetchall()
         result = [{column: row[i]
@@ -103,9 +114,10 @@ class UserModel:
         self.conn.close()
 
     def get_by_id(self, _id):
-        query = f"WHERE email = '{_id}'"
-
-        return self.list_items(query)
+        if type(_id) == int:
+            return self.list_items(f"WHERE id = {_id}")
+        else:
+            return self.list_items(f"WHERE email = '{_id}'")
 
     def get_by_email(self, email):
         query = f"SELECT id, name, email, password, updated " \
