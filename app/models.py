@@ -84,9 +84,15 @@ class CryptoWatcherModel:
         return self.get_by_id(item_id)
 
     def list_items(self, user_id):
-        query = f"SELECT name, ticker, amountHeld, accountAddress, user_id " \
+        query = ""
+        if type(user_id) == int:
+            query = f"SELECT name, ticker, amountHeld, accountAddress, user_id " \
                 f"from {self.table_name} " \
-                f"WHERE user_id = (SELECT id FROM USER WHERE email = '{user_id}')"
+                f"WHERE user_id = {user_id}"
+        else:
+            query = f"SELECT name, ticker, amountHeld, accountAddress, user_id " \
+                    f"from {self.table_name} " \
+                    f"WHERE user_id = (SELECT id FROM USER WHERE email = '{user_id}')"
         print(query)
         result_set = self.conn.execute(query).fetchall()
         result = [{column: row[i]
@@ -108,9 +114,10 @@ class UserModel:
         self.conn.close()
 
     def get_by_id(self, _id):
-        query = f"WHERE email = '{_id}'"
-
-        return self.list_items(query)
+        if type(_id) == int:
+            return self.list_items(f"WHERE id = {_id}")
+        else:
+            return self.list_items(f"WHERE email = '{_id}'")
 
     def get_by_email(self, email):
         query = f"SELECT id, name, email, password, updated " \

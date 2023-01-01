@@ -3,6 +3,7 @@ import datetime
 import flask
 import flask_login
 import urllib
+import base64
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for, session, g
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -38,68 +39,11 @@ def before_request():
     app.permanent_session_lifetime = datetime.timedelta(minutes=1)
     flask.session.modified = True
     g.user = current_user
-    # print(f"Before request current_user.id: {current_user.id}, username: {current_user.username},
-    # dbId: {current_user.dbId}")
 
 
 @app.route("/")
 def home():
     return render_template("home.html")
-
-
-@app.route("/tokens")
-@flask_login.login_required
-def tokens():
-    # print(f"Tokens user id: {current_user.id}, dbId: {current_user.dbId}")
-    if current_user is not None:
-        print(current_user.id)
-        print(session["user_dbId"])
-        return render_template("crypto.html", user_email=current_user.id)
-    flash('Please login before accessing crypto page.')
-    return render_template("login.html")
-
-
-@app.route("/about")
-def about():
-    return render_template("about.html")
-
-
-@app.route("/list-tokens/<user_id>", methods=["GET"])
-@flask_login.login_required
-def list_tokens(user_id):
-    # print(f"List-tokens user id: {current_user.id}, dbId: {current_user.dbId}")
-    return jsonify(CryptoWatcherService().list(user_id))
-
-
-@app.route("/token", methods=["POST"])
-def create_token():
-    return jsonify(CryptoWatcherService().create(request.get_json()))
-
-
-@app.route("/token/<token_id>", methods=["PUT"])
-def update_item(token_id):
-    # print(token_id)
-    # print(request.get_json())
-    flash("Not implemented yet")
-    return render_template("crypto.html")
-    # return jsonify(CryptoWatcherService().update(token_id, request.get_json()))
-
-
-@app.route("/token/<token_id>", methods=["DELETE"])
-@flask_login.login_required
-def delete_item(token_id):
-    return jsonify(CryptoWatcherService().delete(token_id, request.get_json()))
-
-
-@app.route('/profile')
-@flask_login.login_required
-def profile():
-    if current_user is not None:
-        user = UserService().get_by_email(current_user.id)
-        return render_template('profile.html', name=user['name'], email=user['email'])
-
-    flash('Please login before accessing profile page.')
-    return render_template('login.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -121,9 +65,6 @@ def login():
         user_obj.id = user['email']
         user_obj.name = user['name']
         user_obj.dbId = user['id']
-        print(f'Found user in db: {user_obj}')
-        # print(user.keys())
-        # print(user['name'])
 
         # check if user actually exists
         # take the user supplied password, hash it, and compare it to the hashed password in database
@@ -136,6 +77,18 @@ def login():
         # login_user(user_obj, remember=remember, force=True)
         flask_login.login_user(user_obj)
         return render_template('profile.html', name=current_user.name, email=user['email'])
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    session["user_dbId"] = ""
+    flask_login.logout_user()
+    res = flask.make_response("Deleting cookie")
+    res.set_cookie('', max_age=0)
+    current_user.logged_in = False
+
+    return redirect(url_for('home'))
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -174,16 +127,73 @@ def signup():
                 return redirect(url_for('login'))
 
 
-@app.route('/logout')
-@login_required
-def logout():
-    session["user_dbId"] = ""
-    flask_login.logout_user()
-    res = flask.make_response("Deleting cookie")
-    res.set_cookie('', max_age=0)
-    current_user.logged_in = False
+@app.route('/users', methods=['GET'])
+def get_users():
+    if len(current_user.__dict__) == 0:
+        flash('Try adding an Auth header.')
+        return render_template('login.html')
+    if current_user.id == 'dcallif22@gmail.com':
+        return jsonify(UserService().list())
+    else:
+        return render_template('home.html')
 
-    return redirect(url_for('home'))
+
+@app.route("/tokens")
+@flask_login.login_required
+def tokens():
+    # print(f"Tokens user id: {current_user.id}, dbId: {current_user.dbId}")
+    if current_user is not None:
+        return render_template("crypto.html", user_email=current_user.id)
+    flash('Please login before accessing crypto page.')
+    return render_template("login.html")
+
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+
+@app.route("/list-tokens", methods=["GET"])
+def list_tokens():
+    if len(current_user.__dict__) == 0:
+        flash('Try logging in or adding an Auth header if calling API.')
+        # return render_template('login.html')
+        return jsonify("Invalid auth.")
+    print(f"List-tokens user id: {current_user.id}, dbId: {current_user.dbId}")
+    if session.get("user_dbId") is not None:
+        return jsonify(CryptoWatcherService().list(current_user.dbId))
+    else:
+        return jsonify("Invalid auth.")
+
+
+@app.route("/token", methods=["POST"])
+def create_token():
+    return jsonify(CryptoWatcherService().create(request.get_json()))
+
+
+@app.route("/token/<token_id>", methods=["PUT"])
+def update_item(token_id):
+    # print(token_id)
+    # print(request.get_json())
+    flash("Not implemented yet")
+    return render_template("crypto.html")
+    # return jsonify(CryptoWatcherService().update(token_id, request.get_json()))
+
+
+@app.route("/token/<token_id>", methods=["DELETE"])
+def delete_item(token_id):
+    return jsonify(CryptoWatcherService().delete(token_id, request.get_json()))
+
+
+@app.route('/profile')
+@flask_login.login_required
+def profile():
+    if current_user is not None:
+        user = UserService().get_by_email(current_user.id)
+        return render_template('profile.html', name=user['name'], email=user['email'])
+
+    flash('Please login before accessing profile page.')
+    return render_template('login.html')
 
 
 class User(flask_login.UserMixin):
@@ -217,29 +227,33 @@ def load_user(user_id):
 
 @login_manager.request_loader
 def request_loader(request):
-    # Get email from url
-    email = urllib.parse.unquote(request.url.rsplit('/', 1)[-1])
-    u = UserService().get_by_email(email)
+    # Probably what I should do:
+    auth_str = request.headers.get('Authorization')
+    token = auth_str.split(' ')[1] if auth_str else ''
+    if not token:
+        return None
 
-    if u is not None:
+    user_name = base64.b64decode(token).decode('UTF-8').split(':')[0]
+    pass_w = base64.b64decode(token).decode('UTF-8').split(':')[1]
+
+    # Need to perform a lookup using the auth string...still thinking about that.
+    u = UserService().get_by_email(user_name)
+    if u is None:
+        return None
+
+    if not check_password_hash(u['password'], pass_w):
+        flash("Invalid authorization.", "danger")
+        return None
+    if u:
         session["user_dbId"] = u['id']
-        user = User()
-        user.id = email
-        user.dbId = u['id']
-        user.username = u['email']
-        user.name = u['name']
-        print(f"request_loader testing: {session.items()}")
-        return user
-    print(f"request_loader testing: {session.items()}")
+        user_obj = User()
+        user_obj.id = int(u['id'])
+        user_obj.dbId = u['id']
+        user_obj.username = u['email']
+        user_obj.name = u['name']
+        if user_obj:
+            return user_obj
     return None
-
-
-@app.route('/users', methods=['GET'])
-def get_users():
-    if current_user.id == 'dcallif22@gmail.com':
-        return jsonify(UserService().list())
-    else:
-        return render_template('home.html')
 
 
 if __name__ == "__main__":

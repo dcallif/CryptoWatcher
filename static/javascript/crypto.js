@@ -17,7 +17,7 @@ function numberWithCommas(x) {
 let editElement
 let editFlag = false
 let editID = ''
-const APP_URL = "http://localhost:8888"
+const APP_URL = "http://127.0.0.1:8888" // localhost
 
 form.addEventListener('submit', addItem)
 
@@ -38,7 +38,8 @@ async function makeAPICall(url = '', method="POST", data = null) {
         // 'Content-Type': 'application/x-www-form-urlencoded',
       },
       redirect: 'follow', // manual, *follow, error
-      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      //referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      referrerPolicy: 'strict-origin-when-cross-origin',
       body: data // body data type must match "Content-Type" header
     });
     return response.json(); // parses JSON response into native JavaScript objects
@@ -121,7 +122,7 @@ function setBackToDefault() {
 
 function setupItems(){
     const user = user_email.value
-    makeAPICall(`/list-tokens/${user}`, "GET").then((data) => {
+    makeAPICall(`/list-tokens`, "GET").then((data) => {
         // Sort by value
         // data.sort((a, b) => a.value - b.value);
 
