@@ -10,6 +10,16 @@
     />
     <link rel="stylesheet" href="../static/css/template.css" />
 </head>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% if messages[0] %}
+    <p class="alert"></p>
+    <div class="alert-danger">
+        {{ messages[0] }}
+    </div>
+    {% endif %}
+    {% endif %}
+    {% endwith %}
 <body>
 {% extends "template.html" %}
 {% block content %}

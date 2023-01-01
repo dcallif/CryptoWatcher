@@ -2,6 +2,7 @@ import datetime
 
 import flask
 import flask_login
+import urllib
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for, session, g
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -10,13 +11,14 @@ from service import CryptoWatcherService, UserService
 from flask_login import LoginManager, login_required, current_user
 
 login_manager = LoginManager()
+login_manager.login_view = 'login'
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 
 app.config['SECRET_KEY'] = 'secret-key-goes-here'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///watcher.db'
 app.config['REMEMBER_COOKIE_NAME'] = app.config.get('remember_cookie_name')
-app.REMEMBER_COOKIE_DURATION = datetime.timedelta(minutes=60)
-app.PERMANENT_SESSION_LIFETIME = datetime.timedelta(minutes=60)
+app.REMEMBER_COOKIE_DURATION = datetime.timedelta(minutes=1)
+app.PERMANENT_SESSION_LIFETIME = datetime.timedelta(minutes=1)
 
 login_manager.init_app(app)
 
@@ -33,9 +35,11 @@ def add_headers(response):
 @app.before_request
 def before_request():
     session.permanent = True
-    app.permanent_session_lifetime = datetime.timedelta(minutes=60)
+    app.permanent_session_lifetime = datetime.timedelta(minutes=1)
     flask.session.modified = True
     g.user = current_user
+    # print(f"Before request current_user.id: {current_user.id}, username: {current_user.username},
+    # dbId: {current_user.dbId}")
 
 
 @app.route("/")
@@ -46,8 +50,10 @@ def home():
 @app.route("/tokens")
 @flask_login.login_required
 def tokens():
-    if current_user.id is not None:
-        # print(current_user.id)
+    # print(f"Tokens user id: {current_user.id}, dbId: {current_user.dbId}")
+    if current_user is not None:
+        print(current_user.id)
+        print(session["user_dbId"])
         return render_template("crypto.html", user_email=current_user.id)
     flash('Please login before accessing crypto page.')
     return render_template("login.html")
@@ -61,6 +67,7 @@ def about():
 @app.route("/list-tokens/<user_id>", methods=["GET"])
 @flask_login.login_required
 def list_tokens(user_id):
+    # print(f"List-tokens user id: {current_user.id}, dbId: {current_user.dbId}")
     return jsonify(CryptoWatcherService().list(user_id))
 
 
@@ -71,7 +78,11 @@ def create_token():
 
 @app.route("/token/<token_id>", methods=["PUT"])
 def update_item(token_id):
-    return jsonify(CryptoWatcherService().update(token_id, request.get_json()))
+    # print(token_id)
+    # print(request.get_json())
+    flash("Not implemented yet")
+    return render_template("crypto.html")
+    # return jsonify(CryptoWatcherService().update(token_id, request.get_json()))
 
 
 @app.route("/token/<token_id>", methods=["DELETE"])
@@ -83,7 +94,7 @@ def delete_item(token_id):
 @app.route('/profile')
 @flask_login.login_required
 def profile():
-    if current_user.id is not None:
+    if current_user is not None:
         user = UserService().get_by_email(current_user.id)
         return render_template('profile.html', name=user['name'], email=user['email'])
 
@@ -101,6 +112,7 @@ def login():
         remember = True if request.form.get('remember') else False
 
         user = UserService().get_by_email(email)
+        session["user_dbId"] = user['id']
         # user_obj = {user['email']: {'password': user['password']}}
         if user is None:
             flash('Please check your login details and try again.')
@@ -108,6 +120,7 @@ def login():
         user_obj = User()
         user_obj.id = user['email']
         user_obj.name = user['name']
+        user_obj.dbId = user['id']
         print(f'Found user in db: {user_obj}')
         # print(user.keys())
         # print(user['name'])
@@ -164,6 +177,7 @@ def signup():
 @app.route('/logout')
 @login_required
 def logout():
+    session["user_dbId"] = ""
     flask_login.logout_user()
     res = flask.make_response("Deleting cookie")
     res.set_cookie('', max_age=0)
@@ -173,6 +187,16 @@ def logout():
 
 
 class User(flask_login.UserMixin):
+    username = ""
+    dbId = -1
+
+    def get_id(self):
+        return self.id
+
+    def __init__(self):
+        self.username = ""
+        self.dbId = -1
+
     pass
 
 
@@ -180,23 +204,42 @@ class User(flask_login.UserMixin):
 def load_user(user_id):
     # print(''.join(user_id[1]))
     # return UserService().get_by_id(user_id)
+    u = UserService().get_by_email(user_id)
+    session["user_dbId"] = u['id']
+
     user = User()
     user.id = user_id
+    user.dbId = u['id']
+    user.username = u['email']
+    user.name = u['name']
     return user
 
 
 @login_manager.request_loader
 def request_loader(request):
-    email = request.form.get('email')
+    # Get email from url
+    email = urllib.parse.unquote(request.url.rsplit('/', 1)[-1])
+    u = UserService().get_by_email(email)
 
-    user = User()
-    user.id = email
-    return user
+    if u is not None:
+        session["user_dbId"] = u['id']
+        user = User()
+        user.id = email
+        user.dbId = u['id']
+        user.username = u['email']
+        user.name = u['name']
+        print(f"request_loader testing: {session.items()}")
+        return user
+    print(f"request_loader testing: {session.items()}")
+    return None
 
 
 @app.route('/users', methods=['GET'])
 def get_users():
-    return jsonify(UserService().list())
+    if current_user.id == 'dcallif22@gmail.com':
+        return jsonify(UserService().list())
+    else:
+        return render_template('home.html')
 
 
 if __name__ == "__main__":

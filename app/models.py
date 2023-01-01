@@ -17,6 +17,7 @@ class Schema:
                   id INTEGER PRIMARY KEY,
                   name TEXT,
                   ticker TEXT,
+                  accountAddress TEXT,
                   amountHeld INTEGER,
                   user_id INTEGER FOREIGNKEY REFERENCES USER(id)
                 );
@@ -83,7 +84,7 @@ class CryptoWatcherModel:
         return self.get_by_id(item_id)
 
     def list_items(self, user_id):
-        query = f"SELECT name, ticker, amountHeld, user_id " \
+        query = f"SELECT name, ticker, amountHeld, accountAddress, user_id " \
                 f"from {self.table_name} " \
                 f"WHERE user_id = (SELECT id FROM USER WHERE email = '{user_id}')"
         print(query)

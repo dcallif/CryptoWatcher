@@ -94,10 +94,14 @@ function deleteTodo(e) {
 }
 
 function editTodo(e) {
+    const edit_token = e.currentTarget.parentElement.parentElement
+    const user = user_email.value
+
+    displayAlert('Not yet implemented.', 'danger')
+    console.log(edit_token)
     const element = e.currentTarget.parentElement.parentElement
-    editElement = e.currentTarget.parentElement.previousElementSibling
-    editID = element.dataset.id
-    makeAPICall(`/todo/${editID}`, "GET").then((data) => {
+    const id = element.getAttribute("token-name")
+    makeAPICall(`/token/${id}`, "PUT", {"user_email":user}).then((data) => {
         data = data[0]
         token.value = data.Title
         ticker.value = data.ticker
@@ -118,8 +122,6 @@ function setBackToDefault() {
 function setupItems(){
     const user = user_email.value
     makeAPICall(`/list-tokens/${user}`, "GET").then((data) => {
-        // console.log(data)
-
         // Sort by value
         // data.sort((a, b) => a.value - b.value);
 
