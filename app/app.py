@@ -2,7 +2,6 @@ import datetime
 
 import flask
 import flask_login
-import urllib
 import base64
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for, session, g
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -14,6 +13,8 @@ from flask_login import LoginManager, login_required, current_user
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
+# app = Flask(__name__, template_folder='/home/qy8fou0m88j5/CryptoWatcher/templates',
+# static_folder='/home/qy8fou0m88j5/CryptoWatcher/static')
 
 app.config['SECRET_KEY'] = 'secret-key-goes-here'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///watcher.db'
@@ -22,6 +23,7 @@ app.REMEMBER_COOKIE_DURATION = datetime.timedelta(minutes=60)
 app.PERMANENT_SESSION_LIFETIME = datetime.timedelta(minutes=60)
 
 login_manager.init_app(app)
+Schema()
 
 
 @app.after_request
