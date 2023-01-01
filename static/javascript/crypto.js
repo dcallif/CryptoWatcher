@@ -17,7 +17,8 @@ function numberWithCommas(x) {
 let editElement
 let editFlag = false
 let editID = ''
-const APP_URL = "http://127.0.0.1:8888" // localhost
+const APP_URL = "http://127.0.0.1:8888"
+// const APP_URL = "http://reluctanttycoon.com/crypto"
 
 form.addEventListener('submit', addItem)
 
