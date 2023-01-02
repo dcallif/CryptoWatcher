@@ -4,6 +4,7 @@ const token = document.getElementById('name')
 const ticker = document.getElementById('ticker')
 const amountHeld = document.getElementById('amount')
 const user_email = document.getElementById('user_email')
+const address = document.getElementById('accountAddress')
 const submitBtn = document.querySelector('.submit-btn')
 const container = document.querySelector('.token-container')
 const list = document.querySelector('.token-list')
@@ -55,13 +56,14 @@ function addItem(e) {
     const item_ticker = ticker.value
     const amount = amountHeld.value
     const user = user_email.value
+    const accountAddress = address.value
 
     if (!name || !item_ticker || !amount || !user){
         displayAlert('Please enter crypto details','danger')
         return
     }
 
-    makeAPICall(`/token`, "POST", { "name":name, "ticker":item_ticker, "amountHeld":amount, "user_email":user })
+    makeAPICall(`/token`, "POST", { "name":name, "ticker":item_ticker, "amountHeld":amount, "user_email":user, "accountAddress": accountAddress })
             .then(data => {
             console.log(data); // JSON data parsed by `data.json()` call
             displayAlert('Token added to the list!', 'success')

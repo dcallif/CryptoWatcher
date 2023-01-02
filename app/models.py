@@ -58,9 +58,9 @@ class CryptoWatcherModel:
 
     def create(self, params):
         query = f'INSERT INTO {self.table_name} ' \
-                f'(name, ticker, amountHeld, user_id) ' \
+                f'(name, ticker, amountHeld, accountAddress, user_id) ' \
                 f'values ("{params.get("name")}","{params.get("ticker")}",' \
-                f'{params.get("amountHeld")},(SELECT id FROM USER WHERE email = "{params.get("user_email")}"))'
+                f'{params.get("amountHeld")}, "{params.get("accountAddress")}", (SELECT id FROM USER WHERE email = "{params.get("user_email")}"))'
         print(query)
         result = self.conn.execute(query)
         return self.list_items(params.get("user_email"))
