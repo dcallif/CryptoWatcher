@@ -8,13 +8,24 @@
 
   </head>
 <br>
-<h2 class="title">
-  Welcome, {{ name }}!
-</h2>
-<br>
-<a>Your email is: {{email}}</a><br>
-<p>Checkout your
-      <a href="{{ url_for('tokens') }}">Crypto Holding Page</a>
+<h2>Welcome, {{ name }}!</h2>
+<p>Your email is: {{email}}. Checkout your Crypto Holding Page
+      <a href="{{ url_for('tokens') }}">Here</a>
 </p>
-<button class='btn' onclick="myFunction()">Toggle dark mode</button>
+<button class='btn' onclick="flipTheLights()">Toggle dark mode</button>
+<section class='section-center'>
+  <form class='token-form'>
+    <p class="alert"></p>
+    <h3>Account Settings</h3>
+    <div class="form-control">
+      <input type="password" id='pass1' placeholder="Current Password" />
+      <input type="password" id='pass2' placeholder="New Password" />
+      <input type="password" id='pass3' placeholder="New Password Again" />
+      <button type='submit' class='submit-btn'>
+        Update
+      </button>
+    </div>
+  </form>
+</section>
+<script src="../static/javascript/profile.js"></script>
 {% endblock %}

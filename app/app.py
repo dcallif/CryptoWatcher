@@ -58,11 +58,10 @@ def login():
         remember = True if request.form.get('remember') else False
 
         user = UserService().get_by_email(email)
-        session["user_dbId"] = user['id']
-        # user_obj = {user['email']: {'password': user['password']}}
         if user is None:
             flash('Please check your login details and try again.')
-            return redirect(url_for('login'))  # if user doesn't exist or password is wrong, reload the page
+            return redirect(url_for('login'))  # if user doesn't exist
+        session["user_dbId"] = user['id']
         user_obj = User()
         user_obj.id = user['email']
         user_obj.name = user['name']
@@ -70,13 +69,11 @@ def login():
 
         # check if user actually exists
         # take the user supplied password, hash it, and compare it to the hashed password in database
-        # if not user or not check_password_hash(user.password, password):
         if not user or not check_password_hash(user['password'], password):
             flash('Please check your login details and try again.')
             return redirect(url_for('login'))  # if user doesn't exist or password is wrong, reload the page
 
         # if the above check passes, then we know the user has the right creds
-        # login_user(user_obj, remember=remember, force=True)
         flask_login.login_user(user_obj)
         return render_template('profile.html', name=current_user.name, email=user['email'])
 
@@ -132,7 +129,7 @@ def signup():
 @app.route('/users', methods=['GET'])
 def get_users():
     if len(current_user.__dict__) == 0:
-        flash('Try adding an Auth header.')
+        flash('Missing or Invalid Auth header.')
         return render_template('login.html')
     if current_user.id == 'dcallif22@gmail.com':
         return jsonify(UserService().list())
@@ -193,29 +190,26 @@ def profile():
     if current_user is not None:
         user = UserService().get_by_email(current_user.id)
         return render_template('profile.html', name=user['name'], email=user['email'])
-
     flash('Please login before accessing profile page.')
     return render_template('login.html')
 
 
 class User(flask_login.UserMixin):
-    username = ""
-    dbId = -1
+    username = None
+    dbId = None
 
     def get_id(self):
         return self.id
 
     def __init__(self):
-        self.username = ""
-        self.dbId = -1
-
+        self.id = None
+        self.username = None
+        self.dbId = None
     pass
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    # print(''.join(user_id[1]))
-    # return UserService().get_by_id(user_id)
     u = UserService().get_by_email(user_id)
     session["user_dbId"] = u['id']
 
@@ -229,20 +223,18 @@ def load_user(user_id):
 
 @login_manager.request_loader
 def request_loader(request):
-    # Probably what I should do:
     auth_str = request.headers.get('Authorization')
     token = auth_str.split(' ')[1] if auth_str else ''
+
     if not token:
         return None
 
     user_name = base64.b64decode(token).decode('UTF-8').split(':')[0]
     pass_w = base64.b64decode(token).decode('UTF-8').split(':')[1]
-
-    # Need to perform a lookup using the auth string...still thinking about that.
     u = UserService().get_by_email(user_name)
+
     if u is None:
         return None
-
     if not check_password_hash(u['password'], pass_w):
         flash("Invalid authorization.", "danger")
         return None
@@ -253,8 +245,7 @@ def request_loader(request):
         user_obj.dbId = u['id']
         user_obj.username = u['email']
         user_obj.name = u['name']
-        if user_obj:
-            return user_obj
+        return user_obj
     return None
 
 
