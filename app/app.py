@@ -3,6 +3,8 @@ import datetime
 import flask
 import flask_login
 import base64
+
+import requests
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for, session, g
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -21,6 +23,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///watcher.db'
 app.config['REMEMBER_COOKIE_NAME'] = app.config.get('remember_cookie_name')
 app.REMEMBER_COOKIE_DURATION = datetime.timedelta(minutes=60)
 app.PERMANENT_SESSION_LIFETIME = datetime.timedelta(minutes=60)
+cmc_api_key = "b0e43447-df0a-440a-87b0-572e919b7551"
 
 login_manager.init_app(app)
 Schema()
@@ -159,7 +162,18 @@ def list_tokens():
         return jsonify("Try logging in or adding an Auth header if calling API.")
     print(f"List-tokens user id: {current_user.id}, dbId: {current_user.dbId}")
     if session.get("user_dbId") is not None:
-        return jsonify(CryptoWatcherService().list(current_user.dbId))
+        resp = CryptoWatcherService().list(current_user.dbId)
+        # Check if accountAddress needs to be updated
+        # (only works for XRP currently)
+        for coin in resp:
+            if coin.get("name") == "XRP" and coin.get("accountAddress") is not None:
+                print("Checking XRP balance against ledger...")
+                get_balance = requests.get(f"https://api.xrpscan.com/api/v1/account/{coin.get('accountAddress')}")
+                if get_balance.json()['xrpBalance']:
+                    num = float(get_balance.json()['xrpBalance'])
+                    coin['amountHeld'] = round(num, 3)
+                    print("Updated XRP balance from ledger...")
+        return jsonify(resp)
     else:
         return jsonify("Try logging in or adding an Auth header if calling API.")
 
