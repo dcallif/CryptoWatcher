@@ -11,6 +11,7 @@ const list = document.querySelector('.token-list')
 const clearBtn = document.querySelector('.clear-btn')
 
 function numberWithCommas(x) {
+    // return x.toString();
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
@@ -63,7 +64,8 @@ function addItem(e) {
         return
     }
 
-    makeAPICall(`/token`, "POST", { "name":name, "ticker":item_ticker, "amountHeld":amount, "user_email":user, "accountAddress": accountAddress })
+    makeAPICall(`/token`, "POST", { "name":name, "ticker":item_ticker, "amountHeld":amount,
+    "user_email":user, "accountAddress": accountAddress })
             .then(data => {
             console.log(data); // JSON data parsed by `data.json()` call
             displayAlert('Token added to the list!', 'success')
@@ -145,7 +147,7 @@ function setupItems(){
         // Add items to list in UI
         if (data.length > 0) {
             data.forEach(item => {
-                createListItem(item.name, item.ticker, item.amountHeld)
+                createListItem(item.name, item.ticker, item.amountHeld, item.price)
             })
             container.classList.add('show-container')
         }
@@ -153,16 +155,18 @@ function setupItems(){
     })
 }
 
-function createListItem(id, ticker, amount) {
+function createListItem(id, ticker, amount, price) {
     const element = document.createElement('token')
         element.classList.add('token-item')
         const attr = document.createAttribute('token-name')
         attr.value = id
         element.setAttributeNode(attr)
+        totalPrice = numberWithCommas((amount*price).toFixed(3))
         amount = numberWithCommas(amount)
+        price = numberWithCommas(price)
         element.innerHTML = `
             <p class="title">${ticker}
-            <br/> ${amount}
+            <br>${amount} X $${price} = ${totalPrice}
             </p>
             <div class="btn-container">
                 <button type='button' class='edit-btn'>
