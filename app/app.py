@@ -155,14 +155,13 @@ def about():
 @app.route("/list-tokens", methods=["GET"])
 def list_tokens():
     if len(current_user.__dict__) == 0:
-        flash('Try logging in or adding an Auth header if calling API.')
         # return render_template('login.html')
-        return jsonify("Invalid auth.")
+        return jsonify("Try logging in or adding an Auth header if calling API.")
     print(f"List-tokens user id: {current_user.id}, dbId: {current_user.dbId}")
     if session.get("user_dbId") is not None:
         return jsonify(CryptoWatcherService().list(current_user.dbId))
     else:
-        return jsonify("Invalid auth.")
+        return jsonify("Try logging in or adding an Auth header if calling API.")
 
 
 @app.route("/token", methods=["POST"])
@@ -236,7 +235,6 @@ def request_loader(request):
     if u is None:
         return None
     if not check_password_hash(u['password'], pass_w):
-        flash("Invalid authorization.", "danger")
         return None
     if u:
         session["user_dbId"] = u['id']
