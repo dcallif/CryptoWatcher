@@ -23,7 +23,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///watcher.db'
 app.config['REMEMBER_COOKIE_NAME'] = app.config.get('remember_cookie_name')
 app.REMEMBER_COOKIE_DURATION = datetime.timedelta(minutes=60)
 app.PERMANENT_SESSION_LIFETIME = datetime.timedelta(minutes=60)
-cmc_api_key = "b0e43447-df0a-440a-87b0-572e919b7551"
+cmc_api_key = "api-key-here"
 
 login_manager.init_app(app)
 Schema()
@@ -165,7 +165,9 @@ def list_tokens():
         resp = CryptoWatcherService().list(current_user.dbId)
         # Check if accountAddress needs to be updated
         # (only works for XRP currently)
+        coins = []
         for coin in resp:
+            coins.append(coin.get("ticker"))
             if coin.get("name") == "XRP" and coin.get("accountAddress") is not None:
                 print("Checking XRP balance against ledger...")
                 get_balance = requests.get(f"https://api.xrpscan.com/api/v1/account/{coin.get('accountAddress')}")
@@ -173,6 +175,15 @@ def list_tokens():
                     num = float(get_balance.json()['xrpBalance'])
                     coin['amountHeld'] = round(num, 3)
                     print("Updated XRP balance from ledger...")
+        # Lookup latest price
+        get_prices = requests.get(f"https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol="
+                                  f"{','.join(coins)}&convert=USD", data=None,
+                                  headers={'X-CMC_PRO_API_KEY': cmc_api_key})
+        data = get_prices.json()
+        coins_list = data['data']
+        for coin in resp:
+            # print(f"Updating {coin.get('ticker')} price to {coins_list[coin.get('ticker')]['quote']['USD']['price']}")
+            coin['price'] = round(float(coins_list[coin.get('ticker')]['quote']['USD']['price']), 3)
         return jsonify(resp)
     else:
         return jsonify("Try logging in or adding an Auth header if calling API.")
@@ -218,6 +229,7 @@ class User(flask_login.UserMixin):
         self.id = None
         self.username = None
         self.dbId = None
+
     pass
 
 
