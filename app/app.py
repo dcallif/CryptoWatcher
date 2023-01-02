@@ -143,7 +143,6 @@ def get_users():
 @app.route("/tokens")
 @flask_login.login_required
 def tokens():
-    # print(f"Tokens user id: {current_user.id}, dbId: {current_user.dbId}")
     if current_user is not None:
         return render_template("crypto.html", user_email=current_user.id)
     flash('Please login before accessing crypto page.')
@@ -158,7 +157,6 @@ def about():
 @app.route("/list-tokens", methods=["GET"])
 def list_tokens():
     if len(current_user.__dict__) == 0:
-        # return render_template('login.html')
         return jsonify("Try logging in or adding an Auth header if calling API.")
     print(f"List-tokens user id: {current_user.id}, dbId: {current_user.dbId}")
     if session.get("user_dbId") is not None:
@@ -182,7 +180,6 @@ def list_tokens():
         data = get_prices.json()
         coins_list = data['data']
         for coin in resp:
-            # print(f"Updating {coin.get('ticker')} price to {coins_list[coin.get('ticker')]['quote']['USD']['price']}")
             coin['price'] = round(float(coins_list[coin.get('ticker')]['quote']['USD']['price']), 3)
         return jsonify(resp)
     else:

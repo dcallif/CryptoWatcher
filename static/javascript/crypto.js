@@ -166,7 +166,7 @@ function createListItem(id, ticker, amount, price) {
         price = numberWithCommas(price)
         element.innerHTML = `
             <p class="title">${ticker}
-            <br>${amount} X $${price} = ${totalPrice}
+            <br>${amount} X $${price} = $${totalPrice}
             </p>
             <div class="btn-container">
                 <button type='button' class='edit-btn'>
