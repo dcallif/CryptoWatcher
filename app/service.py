@@ -21,11 +21,12 @@ class CryptoWatcherService:
         # (only works for XRP currently)
         for coin in response:
             if coin.get("name") == "XRP" and coin.get("accountAddress") is not None:
-                print("Checking account balance against ledger...")
+                print("Checking XRP balance against ledger...")
                 get_balance = requests.get(f"https://api.xrpscan.com/api/v1/account/{coin.get('accountAddress')}")
                 if get_balance.json()['xrpBalance']:
-                    # Removes decimals for the moment
-                    coin['amountHeld'] = get_balance.json()['xrpBalance'].split(".")[0]
+                    num = float(get_balance.json()['xrpBalance'])
+                    coin['amountHeld'] = round(num, 3)
+                    print("Updated XRP balance from ledger...")
         return response
 
     def get_by_id(self, item_id):
