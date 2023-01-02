@@ -57,4 +57,5 @@ function updateAccount(e) {
 function setBackToDefault() {
     pass1.value = ''
     pass2.value = ''
+    pass_3.value = ''
 }
