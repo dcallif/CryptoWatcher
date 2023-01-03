@@ -11,7 +11,6 @@ const list = document.querySelector('.token-list')
 const clearBtn = document.querySelector('.clear-btn')
 
 function numberWithCommas(x) {
-    // return x.toString();
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 

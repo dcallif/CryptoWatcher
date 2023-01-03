@@ -1,42 +1,46 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
+<head>
     <meta charset="utf-8">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='../static/css/template.css') }}">
 
-  </head>
-  <body>
-    <header>
-      <div class="container">
+</head>
+<body>
+<header>
+    <div class="container">
         <h1 class="logo">Crypto Watcher</h1>
-        <strong><nav>
-          <ul class="menu">
-            <li class="my-list"><a href="{{ url_for('home') }}">Home</a></li>
-            <li class="my-list"><a href="{{ url_for('about') }}">About</a></li>
-            {% if current_user.id %}
-            <li class="my-list"><a href="{{ url_for('tokens') }}">Crypto</a></li>
-            <li class="my-auth-list"><a href="{{ url_for('logout') }}">Logout</a></li>
-            <li class="my-auth-list"><a href="{{ url_for('profile') }}">Profile</a></li>
-            {% else %}
-            <li class="my-auth-list"><a href="{{ url_for('login') }}">Login</a></li>
-            <li class="my-auth-list"><a href="{{ url_for('signup') }}">Signup</a></li>
-            {% endif %}
-          </ul>
-        </nav></strong>
-      </div>
-    </header>
-    <br>
+        <strong>
+            <nav>
+                <ul class="menu">
+                    <li class="my-list"><a href="{{ url_for('home') }}">Home</a></li>
+                    <li class="my-list"><a href="{{ url_for('about') }}">About</a></li>
+                    {% if current_user.id %}
+                    <li class="my-list"><a href="{{ url_for('tokens') }}">Crypto</a></li>
+                    <li class="my-auth-list"><a href="{{ url_for('logout') }}">Logout</a></li>
+                    <li class="my-auth-list"><a href="{{ url_for('profile') }}">Profile</a></li>
+                    {% else %}
+                    <li class="my-auth-list"><a href="{{ url_for('login') }}">Login</a></li>
+                    <li class="my-auth-list"><a href="{{ url_for('signup') }}">Signup</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </strong>
+    </div>
+</header>
+<br>
 
-    {% block content %}
-    {% endblock %}
+{% block content %}
+{% endblock %}
 
-    <script>
+<script>
     function flipTheLights() {
     var element = document.body;
     element.classList.toggle("dark-mode");
     }
+
+
 </script>
 
-  </body>
+</body>
 </html>
