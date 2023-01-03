@@ -11,9 +11,8 @@ const list = document.querySelector('.token-list')
 const clearBtn = document.querySelector('.clear-btn')
 
 function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return x.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-
 
 let editElement
 let editFlag = false
@@ -160,7 +159,7 @@ function createListItem(id, ticker, amount, price) {
         const attr = document.createAttribute('token-name')
         attr.value = id
         element.setAttributeNode(attr)
-        totalPrice = numberWithCommas((amount*price).toFixed(3))
+        totalPrice = numberWithCommas((amount*price))
         amount = numberWithCommas(amount)
         price = numberWithCommas(price)
         element.innerHTML = `

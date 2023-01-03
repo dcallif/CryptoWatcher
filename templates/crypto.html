@@ -26,7 +26,7 @@
 
 <br>
 <h2>Crypto Page</h2>
-<p><b>Just need to add price pulling!</b></p>
+<p><b>Prices pulled live from coinmarketcap! Displayed prices are rounded but calculation uses 5 decimal original values.</b></p>
 <button class='btn' onclick="flipTheLights()">Toggle dark mode</button>
 <section class='section-center'>
     <form class='token-form'>
@@ -35,7 +35,7 @@
         <div class="form-control">
             <input type="text" id='name' placeholder="Token Name"/>
             <input type="text" id='ticker' placeholder="Ticker (eg. BTC/ETH/XRP)"/>
-            <input type="number" id='amount' placeholder="Balance" step="0.001" min="0"/>
+            <input type="number" id='amount' placeholder="Balance" step="0.00001" min="0"/>
             <input type="text" id='accountAddress' placeholder="Account Address (Used to grab balance from ledger)"/>
             <input type="hidden" id='user_email' value="{{ user_email }}">
             <button type='submit' class='submit-btn'>
