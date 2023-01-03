@@ -51,6 +51,11 @@ def home():
     return render_template("home.html")
 
 
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
@@ -79,18 +84,6 @@ def login():
         # if the above check passes, then we know the user has the right creds
         flask_login.login_user(user_obj)
         return render_template('profile.html', name=current_user.name, email=user['email'])
-
-
-@app.route('/logout')
-@login_required
-def logout():
-    session["user_dbId"] = ""
-    flask_login.logout_user()
-    res = flask.make_response("Deleting cookie")
-    res.set_cookie('', max_age=0)
-    current_user.logged_in = False
-
-    return redirect(url_for('home'))
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -129,7 +122,20 @@ def signup():
                 return redirect(url_for('login'))
 
 
+@app.route('/logout')
+@login_required
+def logout():
+    session["user_dbId"] = ""
+    flask_login.logout_user()
+    res = flask.make_response("Deleting cookie")
+    res.set_cookie('', max_age=0)
+    current_user.logged_in = False
+
+    return redirect(url_for('home'))
+
+
 @app.route('/users', methods=['GET'])
+@flask_login.login_required
 def get_users():
     if len(current_user.__dict__) == 0:
         flash('Missing or Invalid Auth header.')
@@ -149,12 +155,8 @@ def tokens():
     return render_template("login.html")
 
 
-@app.route("/about")
-def about():
-    return render_template("about.html")
-
-
 @app.route("/list-tokens", methods=["GET"])
+@flask_login.login_required
 def list_tokens():
     if len(current_user.__dict__) == 0:
         return jsonify("Try logging in or adding an Auth header if calling API.")
@@ -166,32 +168,42 @@ def list_tokens():
         coins = []
         for coin in resp:
             coins.append(coin.get("ticker"))
-            if coin.get("name") == "XRP" and coin.get("accountAddress") is not None:
+            if coin.get("ticker") == "XRP" and coin.get("accountAddress") is not None:
                 print("Checking XRP balance against ledger...")
                 get_balance = requests.get(f"https://api.xrpscan.com/api/v1/account/{coin.get('accountAddress')}")
                 if get_balance.json()['xrpBalance']:
                     num = float(get_balance.json()['xrpBalance'])
-                    coin['amountHeld'] = round(num, 3)
+                    coin['amountHeld'] = round(num, 5)
                     print("Updated XRP balance from ledger...")
+            if coin.get("ticker") == "XTZ" and coin.get("accountAddress") is not None:
+                print("Checking Tezos balance against ledger...")
+                get_balance = requests.get(f"https://api.tzstats.com/explorer/account/{coin.get('accountAddress')}")
+                if get_balance.json()['spendable_balance']:
+                    num = float(get_balance.json()['spendable_balance'])
+                    coin['amountHeld'] = round(num, 5)
+                    print("Updated Tezos balance from ledger...")
         # Lookup latest price
         get_prices = requests.get(f"https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol="
                                   f"{','.join(coins)}&convert=USD", data=None,
                                   headers={'X-CMC_PRO_API_KEY': cmc_api_key})
         data = get_prices.json()
         coins_list = data['data']
+        print("Grabbing latest prices from coinmarketcap...")
         for coin in resp:
-            coin['price'] = round(float(coins_list[coin.get('ticker')]['quote']['USD']['price']), 3)
+            coin['price'] = round(float(coins_list[coin.get('ticker')]['quote']['USD']['price']), 5)
         return jsonify(resp)
     else:
         return jsonify("Try logging in or adding an Auth header if calling API.")
 
 
 @app.route("/token", methods=["POST"])
+@flask_login.login_required
 def create_token():
     return jsonify(CryptoWatcherService().create(request.get_json()))
 
 
 @app.route("/token/<token_id>", methods=["PUT"])
+@flask_login.login_required
 def update_item(token_id):
     # print(token_id)
     # print(request.get_json())
@@ -201,6 +213,7 @@ def update_item(token_id):
 
 
 @app.route("/token/<token_id>", methods=["DELETE"])
+@flask_login.login_required
 def delete_item(token_id):
     return jsonify(CryptoWatcherService().delete(token_id, request.get_json()))
 

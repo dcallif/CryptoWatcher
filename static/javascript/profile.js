@@ -4,6 +4,7 @@ const submitBtn = document.querySelector('.submit-btn')
 const pass1 = document.getElementById('pass1')
 const pass2 = document.getElementById('pass2')
 const pass3 = document.getElementById('pass3')
+const name = document.getElementById('name')
 
 const APP_URL = "http://127.0.0.1:8888"
 // const APP_URL = "http://reluctanttycoon.com/crypto"
@@ -58,4 +59,5 @@ function setBackToDefault() {
     pass1.value = ''
     pass2.value = ''
     pass_3.value = ''
+    name.value = ''
 }
