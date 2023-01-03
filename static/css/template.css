@@ -220,6 +220,11 @@ Grocery List
   margin-bottom: 1.5rem;
   text-align: center;
 }
+.token-form h4 {
+  color: var(--clr-primary-1);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
 .form-control {
   display: block;
   justify-content: center;
