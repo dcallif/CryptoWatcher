@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Holdings</title>
     <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
     />
-    <link rel="stylesheet" href="../static/css/template.css" />
+    <link rel="stylesheet" href="../static/css/template.css"/>
 </head>
 {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% if messages[0] %}
-    <p class="alert"></p>
-    <div class="alert-danger">
-        {{ messages[0] }}
-    </div>
-    {% endif %}
-    {% endif %}
-    {% endwith %}
+{% if messages %}
+{% if messages[0] %}
+<p class="alert"></p>
+<div class="alert-danger">
+    {{ messages[0] }}
+</div>
+{% endif %}
+{% endif %}
+{% endwith %}
 <body>
 {% extends "template.html" %}
 {% block content %}
@@ -28,30 +28,30 @@
 <h2>Crypto Page</h2>
 <p><b>Just need to add price pulling!</b></p>
 <button class='btn' onclick="flipTheLights()">Toggle dark mode</button>
-    <section class='section-center'>
-        <form class='token-form'>
-            <p class="alert"></p>
-            <h3>Crypto List</h3>
-            <div class="form-control">
-                <input type="text" id='name' placeholder="Token Name" />
-                <input type="text" id='ticker' placeholder="Ticker" />
-                <input type="number" id='amount' placeholder="1000000" step="0.01" min="0" />
-                <input type="text" id='accountAddress' placeholder="Account Address" />
-                <input type="hidden" id='user_email' value="{{ user_email }}">
-                <button type='submit' class='submit-btn'>
-                    Add
-                </button>
-            </div>
-        </form>
-
-        <div class="token-container">
-            <div class="token-list">
-
-            </div>
+<section class='section-center'>
+    <form class='token-form'>
+        <p class="alert"></p>
+        <h3>Crypto List</h3>
+        <div class="form-control">
+            <input type="text" id='name' placeholder="Token Name"/>
+            <input type="text" id='ticker' placeholder="Ticker (eg. BTC/ETH/XRP)"/>
+            <input type="number" id='amount' placeholder="Balance" step="0.001" min="0"/>
+            <input type="text" id='accountAddress' placeholder="Account Address (Used to grab balance from ledger)"/>
+            <input type="hidden" id='user_email' value="{{ user_email }}">
+            <button type='submit' class='submit-btn'>
+                Add
+            </button>
         </div>
-    </section>
+    </form>
 
-    <script src="../static/javascript/crypto.js"></script>
+    <div class="token-container">
+        <div class="token-list">
+
+        </div>
+    </div>
+</section>
+
+<script src="../static/javascript/crypto.js"></script>
 
 {% endblock %}
 </body>

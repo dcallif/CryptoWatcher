@@ -11,7 +11,6 @@ const list = document.querySelector('.token-list')
 const clearBtn = document.querySelector('.clear-btn')
 
 function numberWithCommas(x) {
-    // return x.toString();
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
@@ -70,7 +69,7 @@ function addItem(e) {
             console.log(data); // JSON data parsed by `data.json()` call
             displayAlert('Token added to the list!', 'success')
             container.classList.add('show-container')
-            createListItem(data.id, item_ticker + "", amount + "", user_email + "")
+            createListItem(data.id, item_ticker + "", amount + "", 0)
         });
     setBackToDefault()
 }

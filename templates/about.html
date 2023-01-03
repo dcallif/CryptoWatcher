@@ -1,59 +1,69 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
+<head>
     <meta charset="utf-8">
     <title>About</title>
-  </head>
-  <body>
-    {% extends "template.html" %}
-    {% block content %}
+</head>
+<body>
+{% extends "template.html" %}
+{% block content %}
 
-    <br>
-    <h2>About</h2>
-    <p><b>Wanted a simple crypto tracker to see general info.</b></p>
-    <button class='btn' onclick="flipTheLights()">Toggle dark mode</button>
-    <br>
-    <h3>Links That Made This Project Come Together:</h3>
-    <ul>
-      <li>
-        <a href="https://stackoverflow.com/questions/197748/how-do-i-change-the-background-color-with-javascript" target="_blank">CSS Background Color Manipulation</a>
-      </li>
-      <li>
-        <a href="https://css-tricks.com/a-complete-guide-to-dark-mode-on-the-web/#aa-using-javascript-local-storage" target="_blank">More CSS Background Tricks</a>
-      </li>
-      <li>
-        <a href="https://www.kirsle.net/wizards/flask-session.cgi" target="_blank">Helpful Cookie Decoder For Testing</a>
-      </li>
-      <li>
-        <a href="https://www.codingninjas.com/codestudio/library/handling-cookies-in-flask" target="_blank">Handling Cookies In Flask</a>
-      </li>
-      <li>
-        <a href="https://hackersandslackers.com/flask-login-user-authentication/" target="_blank">Flask Login Help</a>
-      </li>
-      <li>
-        <a href="https://medium.com/bhavaniravi/build-your-1st-python-web-app-with-flask-b039d11f101c" target="_blank">General Flask Implementation Tutorial</a>
-      </li>
-    </ul>
-    <br>
-    <h3>Helpful Crypto Links:</h3>
-    <ul>
-      <li>
-        <a href="https://nomics.com/watchlist?view=portfolio" target="_blank">Nomics</a>
-      </li>
-      <li>
-        <a href="https://www.livecoinwatch.com/" target="_blank">LiveCoin Watch</a>
-      </li>
-      <li>
-        <a href="https://app.pangolin.exchange/" target="_blank">Pangolin DEFI</a>
-      </li>
-      <li>
-        <a href="https://xff.flr.finance/" target="_blank">Flare Finance</a>
-      </li>
-      <li>
-        <a href="https://xrpscan.com/" target="_blank">XRP Ledger via XRP Scan</a>
-      </li>
-    </ul>
+<br>
+<h2>About</h2>
+<p><b>Wanted a simple crypto tracker to see general info.</b></p>
+<button class='btn' onclick="flipTheLights()">Toggle dark mode</button>
+<br>
+<section class='section-center'>
+    <form class='token-form'>
+        <h3>Links That Made This Project Come Together:</h3>
+        <ul>
+            <li>
+                <a href="https://medium.com/bhavaniravi/build-your-1st-python-web-app-with-flask-b039d11f101c"
+                   target="_blank">General Flask Implementation Tutorial</a>
+            </li>
+            <li>
+                <a href="https://hackersandslackers.com/flask-login-user-authentication/" target="_blank">Flask Login
+                    Help</a>
+            </li>
+            <li>
+                <a href="https://www.codingninjas.com/codestudio/library/handling-cookies-in-flask" target="_blank">Handling
+                    Cookies In Flask</a>
+            </li>
+            <li>
+                <a href="https://stackoverflow.com/questions/197748/how-do-i-change-the-background-color-with-javascript"
+                   target="_blank">CSS Background Color Manipulation</a>
+            </li>
+            <li>
+                <a href="https://css-tricks.com/a-complete-guide-to-dark-mode-on-the-web/#aa-using-javascript-local-storage"
+                   target="_blank">More CSS Background Tricks</a>
+            </li>
+            <li>
+                <a href="https://www.kirsle.net/wizards/flask-session.cgi" target="_blank">Helpful Cookie Decoder For
+                    Testing</a>
+            </li>
+        </ul>
+        <br>
+        <h3>Helpful Crypto Links:</h3>
+        <ul>
+            <li>
+                <a href="https://nomics.com/watchlist?view=portfolio" target="_blank">Nomics</a>
+            </li>
+            <li>
+                <a href="https://www.livecoinwatch.com/" target="_blank">LiveCoin Watch</a>
+            </li>
+            <li>
+                <a href="https://app.pangolin.exchange/" target="_blank">Pangolin DEFI</a>
+            </li>
+            <li>
+                <a href="https://xff.flr.finance/" target="_blank">Flare Finance</a>
+            </li>
+            <li>
+                <a href="https://xrpscan.com/" target="_blank">XRP Ledger via XRP Scan</a>
+            </li>
+        </ul>
+    </form>
+</section>
 
-    {% endblock %}
-  </body>
+{% endblock %}
+</body>
 </html>
