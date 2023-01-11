@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>About</title>
 </head>
-<body>
+<body class="dark-mode">
 {% extends "template.html" %}
 {% block content %}
 
@@ -18,11 +18,19 @@
         <h3>Prices and account balances pulled from:</h3>
         <ul>
             <li>
+		        <a href="https://coinmarketcap.com/api"
+		            target="_blank">Coinmarketcap APIs</a>
+	        </li>
+            <li>
                 <a href="https://docs.xrpscan.com/api-doc.html"
                    target="_blank">XRP Scan</a>
             </li>
             <li>
-                <a href="https://api.tzstats.com/explorer"
+                <a href="https://etherscan.io/"
+                   target="_blank">Ether Scan</a>
+            </li>
+            <li>
+                <a href="https://tzstats.com/docs/api"
                    target="_blank">Tezos Explorer</a>
             </li>
         </ul>

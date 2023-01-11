@@ -163,26 +163,51 @@ def list_tokens():
     print(f"List-tokens user id: {current_user.id}, dbId: {current_user.dbId}")
     if session.get("user_dbId") is not None:
         resp = CryptoWatcherService().list(current_user.dbId)
-        # Check if accountAddress needs to be updated
-        # (only works for XRP currently)
         coins = []
         for coin in resp:
             coins.append(coin.get("ticker"))
+            # Lookup XRP balance against ledger with address provided
             if coin.get("ticker") == "XRP" and coin.get("accountAddress") is not None:
-                print("Checking XRP balance against ledger...")
+                print(f"Checking {coin.get('name')} balance against ledger...")
                 get_balance = requests.get(f"https://api.xrpscan.com/api/v1/account/{coin.get('accountAddress')}")
                 if get_balance.json()['xrpBalance']:
                     num = float(get_balance.json()['xrpBalance'])
                     coin['amountHeld'] = round(num, 5)
-                    print("Updated XRP balance from ledger...")
+                    print(f"Updated {coin.get('name')} balance from ledger...")
+            # Lookup Songbird balance against ledger with address provided
+            if coin.get("ticker") == "SGB" and coin.get("accountAddress") is not None:
+                print(f"Checking {coin.get('name')} balance against ledger...")
+                unit_to_sgb = 1000000000000000000
+                body = {"query": "{address(hash: "
+                                 f"\"{coin.get('accountAddress')}\"), "
+                                 "{\n  contractCode\n  fetchedCoinBalance\n  "
+                                 "fetchedCoinBalanceBlockNumber\n  hash\n}}"}
+                get_balance = requests.post("https://songbird-explorer.flare.network/graphiql", json=body)
+                if get_balance.json()['data']:
+                    balance = int(get_balance.json()['data']['address']['fetchedCoinBalance']) / unit_to_sgb
+                    coin['amountHeld'] = balance
+                    print(f"Updated {coin.get('name')} balance from ledger...")
+            # Lookup Tezos balance against ledger with address provided
             if coin.get("ticker") == "XTZ" and coin.get("accountAddress") is not None:
-                print("Checking Tezos balance against ledger...")
+                print(f"Checking {coin.get('name')} balance against ledger...")
                 get_balance = requests.get(f"https://api.tzstats.com/explorer/account/{coin.get('accountAddress')}")
                 if get_balance.json()['spendable_balance']:
                     num = float(get_balance.json()['spendable_balance'])
                     coin['amountHeld'] = round(num, 5)
-                    print("Updated Tezos balance from ledger...")
-        # Lookup latest price
+                    print(f"Updated {coin.get('name')} balance from ledger...")
+            # Lookup Ethereum balance against ledger with address provided
+            if coin.get("ticker") == "ETH" and coin.get("accountAddress") is not None:
+                print(f"Checking {coin.get('name')} balance against ledger...")
+                wei_to_eth = 1000000000000000000
+                get_balance = requests.get(f"https://api.etherscan.io/api?module=account&action=balance&address="
+                                           f"{coin.get('accountAddress')}"
+                                           f"&tag=latest&apikey=T97E9BAQ1QTJNT8HG3CP2N62QMPT145HJ2")
+                if get_balance.json()['message'] == "OK" and get_balance.json()['result']:
+                    balance = int(get_balance.json()['result']) / wei_to_eth
+                    coin['amountHeld'] = balance
+                    print(f"Updated {coin.get('name')} balance from ledger...")
+
+        # Lookup latest prices
         get_prices = requests.get(f"https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol="
                                   f"{','.join(coins)}&convert=USD", data=None,
                                   headers={'X-CMC_PRO_API_KEY': cmc_api_key})
@@ -191,6 +216,8 @@ def list_tokens():
         print("Grabbing latest prices from coinmarketcap...")
         for coin in resp:
             coin['price'] = round(float(coins_list[coin.get('ticker')]['quote']['USD']['price']), 5)
+            coin['percent_change_7d'] = round(float(coins_list[coin.get('ticker')]['quote']['USD']['percent_change_7d'])
+                                              , 5)
         return jsonify(resp)
     else:
         return jsonify("Try logging in or adding an Auth header if calling API.")
@@ -202,14 +229,16 @@ def create_token():
     return jsonify(CryptoWatcherService().create(request.get_json()))
 
 
+@app.route("/token/<token_id>", methods=["GET"])
+@flask_login.login_required
+def get_item(token_id):
+    return jsonify(CryptoWatcherService().get_token(token_id, current_user.dbId))
+
+
 @app.route("/token/<token_id>", methods=["PUT"])
 @flask_login.login_required
 def update_item(token_id):
-    # print(token_id)
-    # print(request.get_json())
-    flash("Not implemented yet")
-    return render_template("crypto.html")
-    # return jsonify(CryptoWatcherService().update(token_id, request.get_json()))
+    return jsonify(CryptoWatcherService().update(token_id, current_user.dbId, request.get_json()))
 
 
 @app.route("/token/<token_id>", methods=["DELETE"])

@@ -186,8 +186,15 @@ main {
 Grocery List
 ===============
 */
-.section-center {
+/*.section-center {
   background: var(--clr-white);
+  border-radius: var(--radius);
+  box-shadow: var(--light-shadow);
+  transition: var(--transition);
+  padding: 2rem;
+}*/
+.section-center {
+  background: #2E9598;
   border-radius: var(--radius);
   box-shadow: var(--light-shadow);
   transition: var(--transition);

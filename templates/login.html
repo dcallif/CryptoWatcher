@@ -6,47 +6,51 @@
     <title>Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='../static/css/template.css') }}">
 
-  </head>
+</head>
 <div class="column is-4 is-offset-4">
     <br>
-    <h3 class="title">Login</h3>
-    <br>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% if messages[0] == 'Successfully created user!' %}
-    <p class="alert"></p>
-    <div class="alert-success">
-        {{ messages[0] }}
-    </div>
-    {% else %}
-    <p class="alert"></p>
-    <div class="alert-danger">
-        {{ messages[0] }} Or signup for a new account <a href="{{ url_for('signup') }}">Here</a>
-    </div>
-    {% endif %}
-    {% endif %}
-    {% endwith %}
-    <div class="box">
-        <form method="POST" action="/login">
-            <div class="field">
-                <div class="control">
-                    <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="">
+    <section class='section-center'>
+        <h3 class="title">Login</h3>
+        <hr>
+        <br>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% if messages[0] == 'Successfully created user!' %}
+        <p class="alert"></p>
+        <div class="alert-success">
+            {{ messages[0] }}
+        </div>
+        {% else %}
+        <p class="alert"></p>
+        <div class="alert-danger">
+            {{ messages[0] }} Or signup for a new account <a href="{{ url_for('signup') }}">Here</a>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endwith %}
+        <div class="box">
+            <form method="POST" action="/login">
+                <div class="field">
+                    <div class="control">
+                        <input class="input is-large" type="email" name="email" placeholder="Your Email"
+                               autofocus="">
+                    </div>
                 </div>
-            </div>
 
-            <div class="field">
-                <div class="control">
-                    <input class="input is-large" type="password" name="password" placeholder="Your Password">
+                <div class="field">
+                    <div class="control">
+                        <input class="input is-large" type="password" name="password" placeholder="Your Password">
+                    </div>
                 </div>
-            </div>
-            <div class="field">
-                <label class="checkbox">
-                    <input type="checkbox" name="remember">
-                    Remember me
-                </label>
-            </div>
-            <button class="button submit-btn is-block is-info is-large is-fullwidth">Login</button>
-        </form>
-    </div>
+                <div class="field">
+                    <label class="checkbox">
+                        <input type="checkbox" name="remember">
+                        Remember me
+                    </label>
+                </div>
+                <button class="button submit-btn is-block is-info is-large is-fullwidth">Login</button>
+            </form>
+        </div>
+    </section>
 </div>
 {% endblock %}

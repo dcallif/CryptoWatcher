@@ -56,6 +56,19 @@ class CryptoWatcherModel:
             where_clause = f"email='{_id}'"
         return self.list_items(where_clause)
 
+    def get_token(self, item_id, user_id):
+        query = f'SELECT id, name, ticker, amountHeld, accountAddress ' \
+            f'FROM {self.table_name} ' \
+            f'WHERE name = "{item_id}" ' \
+            f'AND user_id = {user_id}'
+        print(query)
+        result_set = self.conn.execute(query).fetchall()
+        result = [{column: row[i]
+                   for i, column in enumerate(result_set[0].keys())}
+                  for row in result_set]
+        print(result)
+        return result
+
     def create(self, params):
         query = f'INSERT INTO {self.table_name} ' \
                 f'(name, ticker, amountHeld, accountAddress, user_id) ' \
@@ -73,22 +86,23 @@ class CryptoWatcherModel:
         self.conn.execute(query)
         return self.list_items(params.get('user_email'))
 
-    def update(self, item_id, update_dict):
+    def update(self, item_id, user_id, update_dict):
         set_query = ", ".join([f'{column} = "{value}"'
                                for column, value in update_dict.items()])
         query = f"UPDATE {self.table_name} " \
                 f"SET {set_query} " \
-                f"WHERE name = '{item_id}'"
+                f"WHERE name = '{item_id}' " \
+                f"AND user_id = {user_id}"
         print(query)
         self.conn.execute(query)
-        return self.get_by_id(item_id)
+        return self.get_token(item_id, user_id)
 
     def list_items(self, user_id):
         query = ""
         if type(user_id) == int:
             query = f"SELECT name, ticker, amountHeld, accountAddress, user_id " \
-                f"from {self.table_name} " \
-                f"WHERE user_id = {user_id}"
+                    f"from {self.table_name} " \
+                    f"WHERE user_id = {user_id}"
         else:
             query = f"SELECT name, ticker, amountHeld, accountAddress, user_id " \
                     f"from {self.table_name} " \

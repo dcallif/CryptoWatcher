@@ -3,8 +3,8 @@ const form = document.querySelector('.token-form')
 const token = document.getElementById('name')
 const ticker = document.getElementById('ticker')
 const amountHeld = document.getElementById('amount')
-const user_email = document.getElementById('user_email')
 const address = document.getElementById('accountAddress')
+const user_email = document.getElementById('user_email')
 const submitBtn = document.querySelector('.submit-btn')
 const container = document.querySelector('.token-container')
 const list = document.querySelector('.token-list')
@@ -62,7 +62,8 @@ function addItem(e) {
         return
     }
 
-    makeAPICall(`/token`, "POST", { "name":name, "ticker":item_ticker, "amountHeld":amount,
+    if (!editFlag) {
+        makeAPICall(`/token`, "POST", { "name":name, "ticker":item_ticker, "amountHeld":amount,
     "user_email":user, "accountAddress": accountAddress })
             .then(data => {
             console.log(data); // JSON data parsed by `data.json()` call
@@ -71,6 +72,16 @@ function addItem(e) {
             createListItem(data.id, item_ticker + "", amount + "", 0)
         });
     setBackToDefault()
+    } else if (editFlag) {
+        makeAPICall(`/token/${name}`, 'PUT', { "name":name, "ticker":item_ticker, "amountHeld":amount,
+    "accountAddress": accountAddress })
+            .then(data => {
+                editElement.innerHTML = title
+                displayAlert('Todo edited', 'success')
+                setBackToDefault()
+        })
+    }
+    location.reload()
 }
 
 function displayAlert(text, color) {
@@ -98,17 +109,15 @@ function deleteTodo(e) {
 }
 
 function editTodo(e) {
-    const edit_token = e.currentTarget.parentElement.parentElement
-    const user = user_email.value
-
-    displayAlert('Not yet implemented.', 'danger')
-    console.log(edit_token)
     const element = e.currentTarget.parentElement.parentElement
     const id = element.getAttribute("token-name")
-    makeAPICall(`/token/${id}`, "PUT", {"user_email":user}).then((data) => {
+
+    makeAPICall(`/token/${id}`, "GET").then((data) => {
         data = data[0]
-        token.value = data.Title
+        token.value = data.name
         ticker.value = data.ticker
+        amountHeld.value = data.amountHeld
+        address.value = data.accountAddress
         editFlag = true
         submitBtn.textContent = 'edit'
     })
@@ -143,17 +152,33 @@ function setupItems(){
         });
 
         // Add items to list in UI
+        var totalPrice = 0
         if (data.length > 0) {
             data.forEach(item => {
-                createListItem(item.name, item.ticker, item.amountHeld, item.price)
+                totalPrice += (item.price*item.amountHeld)
+                createListItem(item.name, item.ticker, item.amountHeld, item.price, item.percent_change_7d)
             })
             container.classList.add('show-container')
+            createTotalItem(numberWithCommas(totalPrice))
         }
-
     })
 }
 
-function createListItem(id, ticker, amount, price) {
+function createTotalItem(totalPrice) {
+    const element = document.createElement('token')
+    element.classList.add('token-item')
+    const attr = document.createAttribute('token-name')
+    attr.value = "Total"
+    element.setAttributeNode(attr)
+
+    element.innerHTML = `
+            <p class="title">Total Price: <b><i style="color:green">$${totalPrice}</b></i>
+            </p>
+        `
+    list.appendChild(element)
+}
+
+function createListItem(id, ticker, amount, price, percent_change_7d) {
     const element = document.createElement('token')
         element.classList.add('token-item')
         const attr = document.createAttribute('token-name')
@@ -162,8 +187,12 @@ function createListItem(id, ticker, amount, price) {
         totalPrice = numberWithCommas((amount*price))
         amount = numberWithCommas(amount)
         price = numberWithCommas(price)
+        color = "green"
+        if (percent_change_7d < 0) {
+            color = "red"
+        }
         element.innerHTML = `
-            <p class="title">${ticker}
+            <p class="title">${ticker} <b><i style="color:${color}">${numberWithCommas(percent_change_7d)}%</b></i>
             <br>${amount} X $${price} = $${totalPrice}
             </p>
             <div class="btn-container">

@@ -9,8 +9,8 @@ class CryptoWatcherService:
     def create(self, params):
         return self.model.create(params)
 
-    def update(self, item_id, params):
-        return self.model.update(item_id, params)
+    def update(self, item_id, user_id, params):
+        return self.model.update(item_id, user_id, params)
 
     def delete(self, item_id, params):
         return self.model.delete(item_id, params)
@@ -21,6 +21,10 @@ class CryptoWatcherService:
 
     def get_by_id(self, item_id):
         response = self.model.get_by_id(item_id)
+        return response
+
+    def get_token(self, item_id, user_id):
+        response = self.model.get_token(item_id, user_id)
         return response
 
 
