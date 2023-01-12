@@ -23,7 +23,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///watcher.db'
 app.config['REMEMBER_COOKIE_NAME'] = app.config.get('remember_cookie_name')
 app.REMEMBER_COOKIE_DURATION = datetime.timedelta(minutes=60)
 app.PERMANENT_SESSION_LIFETIME = datetime.timedelta(minutes=60)
+
 cmc_api_key = "api-key-here"
+cmc_endpoint = "https://sandbox-api.coinmarketcap.com/v1/"
+
+xrp_ledger_endpoint = "https://api.xrpscan.com/api/v1/account/"
+songbird_ledger_endpoint = "https://songbird-explorer.flare.network/graphiql"
+tezos_ledger_endpoint = "https://api.tzstats.com/explorer/account/"
+ethereum_ledger_endpoint = "https://api.etherscan.io/api"
 
 login_manager.init_app(app)
 Schema()
@@ -167,48 +174,53 @@ def list_tokens():
         for coin in resp:
             coins.append(coin.get("ticker"))
             # Lookup XRP balance against ledger with address provided
-            if coin.get("ticker") == "XRP" and coin.get("accountAddress") is not None:
+            if coin.get("ticker") == "XRP" and coin.get("accountAddress") is not None and coin.get(
+                    'accountAddress') != 1:
                 print(f"Checking {coin.get('name')} balance against ledger...")
-                get_balance = requests.get(f"https://api.xrpscan.com/api/v1/account/{coin.get('accountAddress')}")
-                if get_balance.json()['xrpBalance']:
+                get_balance = requests.get(f"{xrp_ledger_endpoint}{coin.get('accountAddress')}")
+                if 'xrpBalance' in get_balance.json():
                     num = float(get_balance.json()['xrpBalance'])
                     coin['amountHeld'] = round(num, 5)
                     print(f"Updated {coin.get('name')} balance from ledger...")
             # Lookup Songbird balance against ledger with address provided
-            if coin.get("ticker") == "SGB" and coin.get("accountAddress") is not None:
+            if coin.get("ticker") == "SGB" and coin.get("accountAddress") is not None and coin.get(
+                    'accountAddress') != 1:
                 print(f"Checking {coin.get('name')} balance against ledger...")
                 unit_to_sgb = 1000000000000000000
                 body = {"query": "{address(hash: "
                                  f"\"{coin.get('accountAddress')}\"), "
                                  "{\n  contractCode\n  fetchedCoinBalance\n  "
                                  "fetchedCoinBalanceBlockNumber\n  hash\n}}"}
-                get_balance = requests.post("https://songbird-explorer.flare.network/graphiql", json=body)
-                if get_balance.json()['data']:
+                get_balance = requests.post(songbird_ledger_endpoint, json=body)
+                if 'data' in get_balance.json():
                     balance = int(get_balance.json()['data']['address']['fetchedCoinBalance']) / unit_to_sgb
                     coin['amountHeld'] = balance
                     print(f"Updated {coin.get('name')} balance from ledger...")
             # Lookup Tezos balance against ledger with address provided
-            if coin.get("ticker") == "XTZ" and coin.get("accountAddress") is not None:
+            if coin.get("ticker") == "XTZ" and coin.get("accountAddress") is not None and coin.get(
+                    'accountAddress') != 1:
                 print(f"Checking {coin.get('name')} balance against ledger...")
-                get_balance = requests.get(f"https://api.tzstats.com/explorer/account/{coin.get('accountAddress')}")
-                if get_balance.json()['spendable_balance']:
+                get_balance = requests.get(f"{tezos_ledger_endpoint}{coin.get('accountAddress')}")
+                if 'spendable_balance' in get_balance.json():
                     num = float(get_balance.json()['spendable_balance'])
                     coin['amountHeld'] = round(num, 5)
                     print(f"Updated {coin.get('name')} balance from ledger...")
             # Lookup Ethereum balance against ledger with address provided
-            if coin.get("ticker") == "ETH" and coin.get("accountAddress") is not None:
+            if coin.get("ticker") == "ETH" and coin.get("accountAddress") is not None and coin.get(
+                    'accountAddress') != 1:
                 print(f"Checking {coin.get('name')} balance against ledger...")
                 wei_to_eth = 1000000000000000000
-                get_balance = requests.get(f"https://api.etherscan.io/api?module=account&action=balance&address="
+                get_balance = requests.get(f"{ethereum_ledger_endpoint}?module=account&action=balance&address="
                                            f"{coin.get('accountAddress')}"
                                            f"&tag=latest&apikey=T97E9BAQ1QTJNT8HG3CP2N62QMPT145HJ2")
-                if get_balance.json()['message'] == "OK" and get_balance.json()['result']:
+                if 'message' in get_balance.json() and get_balance.json()['message'] == "OK" \
+                        and 'result' in get_balance.json():
                     balance = int(get_balance.json()['result']) / wei_to_eth
                     coin['amountHeld'] = balance
                     print(f"Updated {coin.get('name')} balance from ledger...")
 
         # Lookup latest prices
-        get_prices = requests.get(f"https://sandbox-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol="
+        get_prices = requests.get(f"{cmc_endpoint}cryptocurrency/quotes/latest?symbol="
                                   f"{','.join(coins)}&convert=USD", data=None,
                                   headers={'X-CMC_PRO_API_KEY': cmc_api_key})
         data = get_prices.json()
